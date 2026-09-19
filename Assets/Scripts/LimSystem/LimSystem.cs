@@ -1043,7 +1043,7 @@ namespace Lanotalium
     public class PreferencesContainer
     {
         public string LastOpenedChartFolder = string.Empty;
-        public string LanguageName = "简体中文";
+        public string LanguageName = "English";
         public string Designer = string.Empty;
         public float MusicPlayerPreciseOffset = 0;
         public float WaveformBlockerPosition = 0;

@@ -15,7 +15,7 @@ public class LimPlugin
 }
 public class PluginExecutionException : Exception
 {
-    public PluginExecutionException(Exception exception) : base("当前插件执行出现异常", exception)
+    public PluginExecutionException(Exception exception) : base("The current plugin threw an exception while running", exception)
     {
 
     }
@@ -37,7 +37,7 @@ public class LimPluginManager : MonoBehaviour
             {
                 IsProjectLoaded = (LimProjectManager.CurrentProject != null && LimTunerManager.Instance.isInitialized),
                 CurrentProject = LimProjectManager.CurrentProject,
-                CurrentLanguage = LimLanguageManager.CurrentLanguage == "简体中文" ? Language.简体中文 : Language.English,
+                CurrentLanguage = LimLanguageManager.CurrentLanguage == "Español" ? Language.Spanish : Language.English,
                 EditorManager = LimEditorManager.Instance,
                 TunerManager = LimTunerManager.Instance,
                 OperationManager = LimOperationManager.Instance,
@@ -50,7 +50,7 @@ public class LimPluginManager : MonoBehaviour
     {
         get
         {
-            return LimLanguageManager.CurrentLanguage == "简体中文" ? Language.简体中文 : Language.English;
+            return LimLanguageManager.CurrentLanguage == "Español" ? Language.Spanish : Language.English;
         }
     }
 

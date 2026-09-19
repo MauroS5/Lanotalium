@@ -25353,7 +25353,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1.2
-  m_Text: "Lanotalium \u8C31\u9762\u4E2D\u5FC3\u4E0E\u4E91\u5907\u4EFD\u529F\u80FD\u4E0B\u7EBF\n\n\u7531\u4E8E\u8FD9\u4E24\u9879\u529F\u80FD\u4F1A\u5927\u91CF\u5360\u7528\u670D\u52A1\u5668\u8D44\u6E90\uFF0C\u4E0E\nLayesta\u51B2\u7A81\u4E1A\u52A1\uFF0C\u56E0\u6B64\u672C\u670D\u52A1\u5373\u65E5\u8D77\u4E0B\u7EBF\u3002\n"
+  m_Text: "ChartZone and cloud backup have been shut down.\n\nBoth features used a large amount of server resources\nand overlapped with Layesta, so the service is now\ndiscontinued.\n"
 --- !u!222 &258939285
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -53989,7 +53989,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Temporarily Obsolete\n\n\u6682\u65F6\u505C\u7528"
+  m_Text: "Temporarily Obsolete"
 --- !u!222 &703093379
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -71759,7 +71759,7 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: "\u7B80\u4F53\u4E2D\u6587"
+    - m_Text: "Espa\u00F1ol"
       m_Image: {fileID: 0}
     - m_Text: English
       m_Image: {fileID: 0}
@@ -86956,7 +86956,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Temporarily Obsolete\n\n\u6682\u65F6\u505C\u7528"
+  m_Text: "Temporarily Obsolete"
 --- !u!222 &1311053694
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -99924,7 +99924,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "News - \u4E2D\u6587"
+  m_Text: News
 --- !u!222 &1484369884
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -116260,7 +116260,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7B80\u4F53\u4E2D\u6587"
+  m_Text: "Espa\u00F1ol"
 --- !u!222 &1725863194
 CanvasRenderer:
   m_ObjectHideFlags: 0

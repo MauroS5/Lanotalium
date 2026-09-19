@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwarzer.Lanotalium", "Schwarzer.Lanotalium.csproj", "{C9154FC0-F43F-5B2C-9BD4-20D0F35D0793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwarzer.Dialogs", "Schwarzer.Dialogs.csproj", "{2C162CA5-70FB-52BB-220A-81A45A38A6DE}"
@@ -8,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{56E05CD5-6FA1-3871-C80C-AAF001B7C8B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwarzer.WebApi", "Schwarzer.WebApi.csproj", "{A1A68F96-AFF5-ECD6-FBD1-C180F18C1A15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lanotalium.Offline", "Lanotalium.Offline.csproj", "{13D1CE02-9B1E-1162-6D08-1C0B59ED832C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwarzer.Chart", "Schwarzer.Chart.csproj", "{F92BD993-FC7C-8D8A-7477-2B61A4781D0D}"
 EndProject
@@ -39,6 +41,10 @@ Global
 		{A1A68F96-AFF5-ECD6-FBD1-C180F18C1A15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1A68F96-AFF5-ECD6-FBD1-C180F18C1A15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1A68F96-AFF5-ECD6-FBD1-C180F18C1A15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13D1CE02-9B1E-1162-6D08-1C0B59ED832C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13D1CE02-9B1E-1162-6D08-1C0B59ED832C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13D1CE02-9B1E-1162-6D08-1C0B59ED832C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13D1CE02-9B1E-1162-6D08-1C0B59ED832C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F92BD993-FC7C-8D8A-7477-2B61A4781D0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F92BD993-FC7C-8D8A-7477-2B61A4781D0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F92BD993-FC7C-8D8A-7477-2B61A4781D0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,5 +64,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
 	EndGlobalSection
 EndGlobal

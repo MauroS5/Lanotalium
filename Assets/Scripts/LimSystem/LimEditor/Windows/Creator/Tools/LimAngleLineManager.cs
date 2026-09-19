@@ -53,6 +53,27 @@ public class LimAngleLineManager : MonoBehaviour
         return Degree;
     }
 
+    /// <summary>Number of anglelines currently on screen; zero while the tool is off.</summary>
+    public int AnglelineCount { get { return RotatedAngles.Count; } }
+
+    /// <summary>
+    /// Nearest angleline to an absolute on-screen degree, with no distance
+    /// threshold. Used while dragging notes, where the note should hop from
+    /// one line to the next rather than only snapping when already close.
+    /// Returns Degree unchanged when no anglelines exist.
+    /// </summary>
+    public float FindNearestAnglelineByDegree(float Degree)
+    {
+        if (RotatedAngles.Count == 0) return Degree;
+        float Best = Degree, BestDelta = float.MaxValue;
+        for (int i = 0; i < RotatedAngles.Count; ++i)
+        {
+            float Delta = Mathf.Abs(Mathf.DeltaAngle(Degree, RotatedAngles[i]));
+            if (Delta < BestDelta) { BestDelta = Delta; Best = RotatedAngles[i]; }
+        }
+        return Best;
+    }
+
     private void GenerateCorrectQuantityAngleline(int AnglelineCount)
     {
         int DeltaQuantity = AnglelineCount - Anglelines.Count;

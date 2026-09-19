@@ -41,6 +41,7 @@ namespace Lanotalium.ChartZone.WebApi
     {
         public static IEnumerator GetAllCharts(ObjectWrap<List<ChartDto>> charts)
         {
+            if (LimOfflineMode.Enabled) { charts.Reference = new List<ChartDto>(); LimOfflineMode.LogBlocked("ChartZone.GetAllCharts"); yield break; }
             WWW Get = new WWW("https://lanotaliumapi.schwarzer.wang/chartzone/charts/enum/" + SystemInfo.deviceUniqueIdentifier);
             yield return Get;
             //Debug.Log(Get.text);
@@ -55,6 +56,7 @@ namespace Lanotalium.ChartZone.WebApi
         }
         public static IEnumerator GetChartById(int id, ObjectWrap<ChartDto> chartDto)
         {
+            if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("ChartZone.GetChartById"); yield break; }
             WWW Get = new WWW("https://lanotaliumapi.schwarzer.wang/chartzone/charts/get/" + SystemInfo.deviceUniqueIdentifier + "/" + id.ToString());
             yield return Get;
             //Debug.Log(Get.text);

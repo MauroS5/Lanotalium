@@ -1,7 +1,8 @@
 {
     "name": "Schwarzer.WebApi",
     "references": [
-        "Schwarzer.Unity"
+        "Schwarzer.Unity",
+        "Lanotalium.Offline"
     ],
     "includePlatforms": [],
     "excludePlatforms": []

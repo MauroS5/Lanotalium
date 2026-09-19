@@ -1,0 +1,373 @@
+﻿!Español
+#TextDict
+Window_Tuner_Label$Tuner
+Window_Tuner_Skin$Skin
+Window_Tuner_Capturer$Capturer
+Window_Tuner_FullScreen$Completa
+Window_Tuner_Head_Designer$Autor del chart
+Window_Tuner_Motion$Motion del Tuner
+Window_Tuner_StretchBGA$Estirar BGA
+Window_Tuner_ChartSpeed$Chart Speed
+Window_Inspector_Label$Inspector
+Window_Inspector_Switcher_Bpm$BPM
+Window_Inspector_Switcher_Scroll$Scroll Speed
+Window_Inspector_Switcher_Default$Por defecto
+Window_MediaPlayer_Label$Reproductor
+Window_MediaPlayer_Progress$Progreso
+Window_MediaPlayer_PlaybackSpeed$Velocidad
+Window_MediaPlayer_Pitch$Tono
+Window_MediaPlayer_PitchReset$Restablecer
+Window_MediaPlayer_Play$Reproducir
+Window_MediaPlayer_Pause$Pausar
+Window_MediaPlayer_Stop$Detener
+Window_MediaPlayer_PreciseControl$Controlador de modo preciso
+Window_MediaPlayer_Offset$Offset
+Window_MediaPlayer_SwitchPlayerMode$Cambiar modo
+Window_MediaPlayer_FixTime$Fix Time
+Window_MediaPlayer_Precise$Preciso
+Window_MediaPlayer_Sync$Sincronizar
+Window_TimeLine_Label$TimeLine
+Window_TimeLine_Hor_Label$Motion (Horizontal)
+Window_TimeLine_Ver_Label$Motion (Vertical)
+Window_TimeLine_Rot_Label$Motion (Rotación)
+Window_TimeLine_WaveformL$Onda L
+Window_TimeLine_WaveformR$Onda R
+Window_TimeLine_Waveform$Forma de onda
+Window_TimeLine_Waveform_LowMemory$Forma de onda desactivada por el límite de memoria de 32 bits.
+Window_Creator_Label$Creator
+Window_Creator_CreateTap$Crear nota Tap
+Window_Creator_CreateHold$Crear nota Hold
+Window_Creator_CreateMotionHor$Crear Motion (Horizontal)
+Window_Creator_CreateMotionVer$Crear Motion (Vertical)
+Window_Creator_CreateMotionRot$Crear Motion (Rotación)
+Window_Creator_CreateMotionManually$Crear Motion (Manual)
+Window_Creator_CreateBpm$Crear BPM
+Window_Creator_CreateScrollSpeed$Crear Scroll Speed
+Window_Creator_CreateCatchRail$Crear Catch Rail
+Window_Creator_CreateCatchRail_Quantity$Cantidad
+Window_Creator_CreateCatchRail_ErrSelection$Tienes que seleccionar dos notas cortas.
+Window_Creator_CreateCatchRail_ErrQuantity$Tienes que introducir una cantidad válida.
+Window_Creator_CreateCatchRail_ErrRange$Tienes que introducir un número mayor que 0.
+Window_Creator_CreateCatchRail_Success$Creado correctamente.
+Window_Creator_ConvertSelectedToHoldNote$Convertir en nota Hold
+Window_Creator_AutoHighlight$Resaltado automático
+Window_Creator_DeleteSelected$Eliminar selección
+Window_Creator_ClickToCreate$Click To Create
+Window_Creator_Angleline$Angleline
+Window_Creator_Copier$Copier
+Component_Basic_Label$Básico
+Component_Basic_Size$Tamaño
+Component_Basic_Timing$Timing
+Component_Basic_Degree$Degree
+Component_Basic_Combination$Combination
+Component_Type_Label$Tipo
+Component_Type_Type$Tipo
+Component_Type_DropDown_Type0$0 - Click
+Component_Type_DropDown_Type2$2 - Flick In
+Component_Type_DropDown_Type3$3 - Flick Out
+Component_Type_DropDown_Type4$4 - Catch
+Component_Type_DropDown_Type5$5 - Rail
+Component_HoldNote_Label$Nota Hold
+Component_HoldNote_Duration$Duración
+Component_HoldNote_JCount$Número de Joints
+Component_HoldNote_Joints$Joints
+Component_HoldNote_Joints_Mode_Absolute$Absoluto
+Component_HoldNote_Joints_Mode_Chained$Encadenado
+Component_HoldNote_Joints_Degree$Degree final
+Component_HoldNote_Joints_Time$Tiempo final
+Component_HoldNote_Joints_Ease$Ease
+Component_Basic_Degree_Absolute$Absoluto
+Component_Motion_Label$Motion
+Component_Motion_Timing$Timing
+Component_Motion_Duration$Duración
+Component_Motion_Cfmi$Ease
+Component_Motion_Ctp0$Ctp0
+Component_Motion_Ctp1$Ctp1
+Component_Motion_Type$Tipo
+Component_Motion_Ctp0_Tp8$Delta Degree
+Component_Motion_Ctp1_Tp8$Delta Radio
+Component_Motion_Ctp0_Tp11$Degree objetivo
+Component_Motion_Ctp1_Tp11$Radio objetivo
+Component_Motion_Ctp0_Tp10$Delta Altura
+Component_Motion_Ctp1_Tp10$Ninguno
+Component_Motion_Ctp0_Tp13$Degree de rotación
+Component_Motion_Ctp1_Tp13$Ninguno
+Component_Motion_ManuallyMotion$Motion manual
+Component_Motion_Unavaliable$No disponible
+Component_Bpm_Label$BPM
+Component_Bpm_Timing$Timing
+Component_Bpm_Bpm$BPM
+Component_Bpm_Beatline$Beatline
+Component_Bpm_Density$Densidad
+Component_Bpm_FixSelected$Corregir selección
+Component_Bpm_FixAll$Corregir todo
+Component_ScrollSpeed_Label$Scroll Speed
+Component_ScrollSpeed_Timing$Timing
+Component_ScrollSpeed_Speed$Velocidad
+Component_ScrollSpeed_ChartSpeed$Chart Speed
+Component_Default_Label$Motion por defecto
+Component_Default_Radius$Radio inicial
+Component_Default_Degree$Degree inicial
+Component_Default_Height$Altura inicial
+Component_Default_Rotation$Rotación inicial
+Preferences_Label$Preferencias
+Preferences_Language$Idioma
+Preferences_Autosave$Autoguardado
+Preferences_JudgeColor$Color del Judge
+Preferences_AudioEffect$Efectos de audio
+Preferences_AudioEffectTheme$Tema de efectos
+Preferences_Unsafe$Motion insegura
+Preferences_WorkingBGM$BGM en pausa
+TopMenu_ChartZone$ChartZone
+TopMenu_ChartZone_MessageBox$Se perderá todo lo que no hayas guardado; asegúrate de haber guardado.
+TopMenu_File$Archivo
+TopMenu_File_NewProject$Nuevo proyecto...
+TopMenu_File_OpenProject$Abrir proyecto...
+TopMenu_File_SaveProject$Guardar proyecto
+TopMenu_File_SaveAsProject$Guardar como chart
+TopMenu_File_Release$Generar release
+TopMenu_File_Exit$Salir
+TopMenu_Window$Ventana
+TopMenu_Window_Inspector$Inspector
+TopMenu_Window_Tuner$Tuner
+TopMenu_Window_TimeLine$TimeLine
+TopMenu_Window_MediaPlayer$Reproductor de música
+TopMenu_Window_Creator$Creator
+TopMenu_Window_Spectrum$Espectro
+TopMenu_Setting$Ajustes
+TopMenu_Setting_Preferences$Preferencias
+TopMenu_Setting_ResetLayout$Restablecer disposición del editor
+TopMenu_Plugin$Plugins
+TopMenu_Plugin_PluginCenter$Centro de plugins
+TopMenu_ChartConvert$Convertir chart
+TopMenu_ChartConvert_Bms$Desde Bms
+TopMenu_ChartConvert_Arcaea$Desde Arcaea
+TopMenu_Status$Estado
+GizmoMotion_Label$Motion manual
+GizmoMotion_ToCreate$Tipos de Motion a crear
+GizmoMotion_EditMode$Modo de edición
+GizmoMotion_From$Desde
+GizmoMotion_To$Hasta
+GizmoMotion_Radius$Radio
+GizmoMotion_Degree$Degree
+GizmoMotion_Height$Altura
+GizmoMotion_Rotation$Rotación
+GizmoMotion_Time$Tiempo
+GizmoMotion_With$Con
+GizmoMotion_Ease$Ease
+GizmoMotion_Duration$Duración
+GizmoMotion_Apply$Aplicar
+ClickToCreate_Enable$Activar
+ClickToCreate_Size$Tamaño
+ClickToCreate_Type$Tipo
+ClickToCreate_AttachTo$Ajustar a
+ClickToCreate_Beatline$Beatline
+ClickToCreate_Angleline$Angleline
+ClickToCreate_Timing$Timing
+ClickToCreate_Degree$Degree
+ClickToCreate_Deltatime$Delta
+Copier_CopyNote$Copiar nota(s) seleccionada(s)
+Copier_CopyMotion$Copiar Motion seleccionada
+Copier_Msg_Success$Copiado correctamente
+Copier_Hint$Tiempo objetivo. Ejemplo: 1;2;4+0.1*3 equivale a 1;2;4;4.1;4.2;4.3
+Capturer_Label$Capturer
+Capturer_Resolution$Resolución
+Capturer_FrameRate$Fotogramas por segundo
+Capturer_Export$Exportar
+Plugin_NotFound$Plugin no encontrado.
+Plugin_NotValid$Plugin no válido / no descargado / necesita actualizarse. Descárgalo en el Centro de plugins.
+Plugin_LoadNotComplete$La carga de plugins no ha terminado, espera un momento.
+Plugin_Download$Descargar
+Plugin_Complete$Completado
+Plugin_Center_Label$Centro de plugins
+Cloud_Cloud$Nube
+Cloud_Backup$Copia de seguridad
+Cloud_Backuping$Creando copia de seguridad
+Cloud_Uploading$Subiendo
+Cloud_Downloading$Descargando
+Cloud_CloudAutosave$Autoguardado en la nube
+Cloud_Chart_Label$Chart
+Cloud_GetMTime_Label$Guardado en la nube:
+Cloud_GetMTime_NotUploadedBefore$No subido anteriormente
+Cloud_Error_UnsupportUserId$Error: ID de usuario no admitido
+Cloud_Error_NetworkNotReachable$Error: red no disponible
+Cloud_Error_NoProjectLoaded$Error: ningún proyecto cargado
+Project_LoadFilter$Proyecto de Lanotalium(*.lap)|*.lap
+Project_Saved$Guardado correctamente.
+Project_InvalidProject$¡Proyecto no válido!
+Project_InvalidProjectFile$¡Archivo de proyecto no válido!
+Project_NoName$¡Tienes que introducir un nombre!
+Project_NoDesigner$¡Tienes que introducir un autor!
+Project_ReadChartFailed$No se ha podido leer el chart, ¡comprueba que sea válido!
+Project_ReadImageFailed$No se han podido leer las imágenes, ¡comprueba que sean válidas!
+Project_ReadMusicFailed$No se ha podido leer la música, ¡comprueba que sea válida!
+Project_ChartWillGenerate$Se ha generado un chart vacío; también puedes seleccionar uno que ya tengas.
+Project_FolderLabel$Carpeta del proyecto
+Project_Name$Nombre
+Project_Designer$Autor
+Project_Music$Ruta de la música
+Project_Chart$Ruta del chart
+Project_BGA$Imagen de fondo
+Project_WizardLabel$Asistente de proyecto
+Project_Open_Create$Crear
+Project_Open_Open$Abrir
+Project_NoBGA$¡Hay que añadir al menos una imagen de fondo!
+ChartZone_Rating_You$Tú
+ChartZone_Rating_Online$Valoración
+ChartZone_Head$Chart Zone
+ChartZone_ChartName$Nombre del chart
+ChartZone_Designer$Autor
+ChartZone_Notes$Notas
+ChartZone_Download$Descargar
+ChartZone_Video$Vídeo
+ChartZone_Rating$Valoración
+ChartZone_CopyRight$Salvo el autor, no se permite grabar los charts de aquí y subirlos a webs de vídeo<br><size=25>Los charts de baja calidad no se recopilarán.</size><br><size=25><color=#FFE57AFF>Pulsa la barra superior para ordenar.</color></size>
+WhatsNew_Label$Novedades
+WhatsNew_Toggle$No volver a mostrar.
+Spectrum_Name$Espectro
+Exception_QueuedCount$Se han producido {0} excepciones más.
+Exception_Next$Siguiente
+Exception_Restart$Guardar y reiniciar Lanotalium
+Exception_Ignore$Ignorar y seguir trabajando
+Exception_Exception$Excepción
+Updator_Update$Actualizar
+Updator_DoUpdate$Guardar y actualizar Lanotalium
+Updator_Ignore$Ignorar y seguir trabajando
+Updator_DeltaFileSize$Tamaño del archivo: {0}
+Updator_FullFileSize$Tamaño del archivo: {0}
+ChartConverting_BmsTitle$Selecciona un chart Bms
+ChartConverting_BmsExtension$Chart Bms(*.bms,*.bme,*.bml,*.pms)|*.bms;*.bme;*.bml;*.pms
+Status$Estado
+Status_LoadProject$Carga un proyecto primero
+Status_TunerStatus$Estado del Tuner
+Status_Rotation$Rotación
+Status_Height$Altura
+Status_Coordinate_Polar$Posición en (ρ,θ)
+Status_Coordinate_Rect$Posición en (x,y)
+Status_ChartStatus$Estado del chart
+Status_TapNote$Notas Tap
+Status_HoldNote$Notas Hold
+Status_CurrentBpm$BPM actual
+Status_CurrentSpeed$Velocidad actual
+Submit_TimeLimit$Solo puedes crear un chart cada 24 horas.
+Submit_TooManyPending$Tienes demasiados envíos pendientes.
+Submit_MySubmit$Mis envíos
+Submit_NewSubmit$Nuevo envío
+Submit_ChartZone$Enviar a ChartZone
+Submission_Accepted$Aceptado
+Submission_Modified$Pendiente de nuevo
+Submission_NotUploaded$No subido
+Submission_Pending$Pendiente
+Submission_Rejected$Rechazado
+Submission_Upload$Subir
+Submission_File_Title$Sube un Zip con el chart, la música, los fondos y el archivo de proyecto.
+Submission_ChartName$Nombre del chart
+Submission_Designer$Autor
+Submission_NoteCount$Número de notas
+Submission_UploadRequest$Sube un Zip con el chart, la música, los fondos y el archivo de proyecto. Tamaño máximo 16MB.
+Submission_ConfirmDelete$¿Confirmas que quieres borrarlo? Esto no se puede deshacer.
+Error_Network$Error de red
+Layesta_Download$Descargar
+Layesta_Download_Hint$Layesta necesita algunas dependencias para funcionar.
+Layesta_NoProject$Carga un proyecto primero.
+Layesta_Send_Hint$Enviar el proyecto actual a este dispositivo
+Layesta_Overwrite$Regenerar audio e imágenes
+Layesta_Send$Enviar
+Layesta_1$Codificando fondos
+Layesta_2$Convirtiendo audio
+Layesta_3$Aplicando desenfoque
+Layesta_4$Finalizando
+Layesta_5$Enviando
+Layesta_Build_Window$Guardar en un archivo .layesta
+Layesta_Build_Title$Generar archivo <color=#459bff>.layesta</color>
+Layesta_Build$Generar
+Layesta_Build_Artist$Artista
+Layesta_Build_Designer$Autor
+Layesta_Build_Chart$Chart
+Layesta_Build_Chart_AddFile$Añadir archivo
+Layesta_Build_Chart_AddThis$Añadir el actual
+Layesta_Build_Chart_Difficulty$Dificultad
+Layesta_Build_Chart_Delete$Eliminar
+Layesta_Build_Name$Nombre
+EasyRequest_Title_Default$Introduce los datos
+EasyRequest_PrimitiveTypes$<color=red>Error:</color> ¡<color=yellow>obj</color> no debería ser de un tipo primitivo!
+EasyRequest_Cancel$Cancelar
+EasyRequest_Confirm$Confirmar
+Plugin_Title_Default$Pulsa el nombre del plugin para ver su descripción.
+Plugin_Exception$¡El plugin en ejecución ha lanzado una excepción!
+Layesta_Submission_Online$Descargas: {0}
+Layesta_Submission_User_Register$Registrarse
+Layesta_Submission_User_Login$Iniciar sesión
+Layesta_Submission_User_Username$Usuario
+Layesta_Submission_User_Password$Contraseña
+Layesta_Submission_User_ConfirmPassword$Confirmar contraseña
+Layesta_Submission_User_Email$Correo electrónico
+Layesta_Submission_User_Switch_Login$Cambiar a iniciar sesión
+Layesta_Submission_User_Switch_Register$Cambiar a registrarse
+Layesta_Submission_User_InvalidToken$El token ha caducado, vuelve a iniciar sesión.
+Layesta_Submission_User_Wait$Espera un momento.
+Layesta_Submission_ConfirmDelete$¿Seguro? Esto es irreversible y borrará todos los archivos del servidor. <color=orange>Nota: si solo quieres actualizarlo, vuelve a subir el archivo nuevo directamente, no hace falta borrarlo.</color>
+Layesta_Submission_Save$Guardar archivo .layesta.
+Layesta_Submission_Load$Cargar archivo .layesta.
+Layesta_Submission_Upload1$Preparando la subida.<br>
+Layesta_Submission_Upload2$Obteniendo la URL de subida del nivel layesta.<br>
+Layesta_Submission_Upload3$Obteniendo la URL de subida de la portada.<br>
+Layesta_Submission_Upload4$Subiendo el nivel layesta...<br>
+Layesta_Submission_Upload5$Subiendo la portada...<br>
+Layesta_Submission_Upload6$Subiendo la información del nivel...<br>
+Layesta_Submission_Upload7$Listo.
+Layesta_Submission_UploadErr1$Archivo no válido.<br>
+Layesta_Submission_UploadErr2$Error al subir.<br>
+Layesta_Submission_UploadErr3$Falta información, subida denegada.<br>
+Layesta_Submission_Upload_Text$Subir
+Layesta_Submission_Download_Text$Descargar
+Layesta_Submission_Delete_Text$Eliminar
+Layesta_Submission_Available_Text$Público
+Layesta_Submission_Participant_Text$Participante del concurso 2019S1
+Layesta_Submission_UploadFirst$Primero tienes que subirlo
+Layesta_Submission_WarnParticipant$Aviso: una vez te apuntes, no podrás desmarcarlo.
+Layesta_Submission_IntervalLimit$Solo puedes crear 1 nivel cada 24 horas.
+Window_Tuner_Demo$Demo
+Layesta_Contest_Warn$Si quieres participar en el concurso, pon como nombre de charter 'Hidden' u otro que no revele tu identidad real.
+#NotificationDict
+Motion_TimeExisted$(Tiempo no válido) Ya hay una Motion en el tiempo actual. No se ha podido crear.
+Motion_InPrevious$(Tiempo no válido) El tiempo actual está dentro de la duración de la Motion anterior. No se ha podido crear.
+Motion_DurationOverflow$(Duración no válida) El tiempo actual + la duración supera la siguiente Motion. No se ha podido crear.
+Background_VideoWarning$Si el chart y el audio no están sincronizados, ajusta el offset y pulsa Fix Time.
+Project_Saved$Guardado.
+#HintDict
+ClickToCreate_Hotkey$Pulsa F2 para activarlo rápido
+Angleline_Hint$Formato<br>Individual: introdúcelo directamente. <br>Por lotes: [Inicio]>[Fin]/[Cantidad]<br>0>30/5 significa 0,6,12,18,24,30<br>Sepáralos con ; (0;2;0>15/3)
+Copier_Hint$Formato<br>Individual: introdúcelo directamente. <br>Por lotes: [Inicio]+[Intervalo]*[Veces]<br>15+0.1*5 significa 15 15.1 15.2 15.3 15.4 15.5<br>Sepáralos con ; (10;30;50+0.5*5)
+Layesta_Play_Hint$Pulsa para cargar el proyecto actual en este dispositivo
+GizmoMotion_Tp8$Motion (Horizontal) - Espiral
+GizmoMotion_Tp11$Motion (Horizontal) - Recta
+GizmoMotion_Tp10$Motion (Vertical)
+GizmoMotion_Tp13$Motion (Rotación)
+GizmoMotion_MoveMode$Botón izquierdo para arrastrar. Rueda para mover en vertical. Ctrl para ir más rápido.
+GizmoMotion_RotateMode$Arrastra alrededor del Tuner para rotar. Ctrl para ir más rápido.
+GizmoMotion_InputMode$Introduce los valores directamente para fijar la posición. Deselecciona TODOS los modos para activar la motion.
+EaseRange$Ease: número entero de 0 a 12.
+Timeline_Scroll$Alt para selección por recuadro, + Ctrl para selección múltiple.<br>Ctrl + rueda para hacer zoom en la TimeLine.<br>Arrastra la barra de tiempo de arriba para ajustar el tiempo.
+Timeline_Prev$Ir a la Motion anterior del mismo tipo que la seleccionada.
+Timeline_Next$Ir a la Motion siguiente del mismo tipo que la seleccionada.
+MediaPlayer_PlayControl$Si no hay ningún botón seleccionado, pulsa Espacio para reproducir/pausar.
+MediaPlayer_Progress$Ctrl + ←/→ mueve el progreso al beatline anterior/siguiente.<br>Alt + ←/→ mueve el progreso 0.001s<br>Shift + ←/→ mueve el progreso 0.01s
+ClickToCreate_Beatline$También puedes mantener Alt al pulsar.
+ClickToCreate_Angleline$También puedes mantener Ctrl al pulsar.
+ClickToCreate_Enable$Pulsa para crear un joint cuando tengas UNA nota larga seleccionada.
+Capturer_Export$Guardará el chart automáticamente y se ignorará cualquier entrada durante la exportación. Pulsa ESC para cancelar.
+TunerWindow_FullScreen$Pulsa ESC para volver.
+Create_Catch$Crear un rail de notas Catch entre las dos notas seleccionadas
+Create_ConvertSelectedToHoldNote$Convertir la selección en nota Hold: la primera en el tiempo será la cabeza y las demás los joints.
+TxtToLap$Para abrir un archivo .txt antiguo, crea un proyecto nuevo y selecciona tu .txt en la ruta del chart.
+MusicFormat$Solo se admiten .wav u .ogg
+DisableChartSpeed$Si lo desactivas, no podrás editar el Scroll Speed en el Inspector ni crear Scroll Speed.
+#TutorialDict
+FirstProject1$¡Bienvenido a Lanotalium!<br>¡Pulsa 'Archivo' para crear tu primer proyecto!
+FirstProject2$¡Pulsa 'Nuevo proyecto' para crear tu primer proyecto!
+FirstProject3$¡Elige la carpeta de tu proyecto!
+FirstProject4$Nota: el formato de música solo admite ogg o wav.
+FirstProject5$Como estás creando un proyecto, ¡deja la ruta del chart en blanco!<br>O selecciona una si ya tienes un chart.
+FirstProject6$Pulsa aquí para añadir hasta 3 imágenes de fondo.
+FirstProject7$¡Pulsa aquí para crearlo!

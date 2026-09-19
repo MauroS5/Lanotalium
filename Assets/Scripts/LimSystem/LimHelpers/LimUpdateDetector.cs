@@ -89,10 +89,12 @@ public class LimUpdateDetector : MonoBehaviour
 
     private void Start()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("UpdateDetector.CheckUpdate"); return; }
         StartCoroutine(CheckUpdateCoroutine());
     }
     IEnumerator GetWebFileLength(ObjectWrap<long> Length, string FileUri)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimUpdateDetector.GetWebFileLength"); yield break; }
         HttpWebRequest Request = (HttpWebRequest)WebRequest.CreateDefault(new Uri(FileUri));
         Request.Method = "HEAD";
         Request.Timeout = 5000;
@@ -118,6 +120,7 @@ public class LimUpdateDetector : MonoBehaviour
     }
     IEnumerator CheckUpdateCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimUpdateDetector.CheckUpdateCoroutine"); yield break; }
         LimSystem.LanotaliumServer = "https://lanotalium.schwarzer.wang";
         WWW CheckUpdate = new WWW(LimSystem.LanotaliumServer + "/lanotalium/build.txt");
         yield return CheckUpdate;
@@ -131,7 +134,7 @@ public class LimUpdateDetector : MonoBehaviour
             if (LatestBuild > LimSystem.Build)
             {
                 #region Load Whatsnew
-                WWW LoadWhatsnew = new WWW(LimSystem.LanotaliumServer + (LimSystem.Preferences.LanguageName == "简体中文" ? "/lanotalium/whatsnew-zhcn.txt" : "/lanotalium/whatsnew-en.txt"));
+                WWW LoadWhatsnew = new WWW(LimSystem.LanotaliumServer + "/lanotalium/whatsnew-en.txt");
                 yield return LoadWhatsnew;
                 if (LoadWhatsnew != null && string.IsNullOrEmpty(LoadWhatsnew.error))
                 {
@@ -165,6 +168,7 @@ public class LimUpdateDetector : MonoBehaviour
     }
     public void DownloadUpdate()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("UpdateDetector.DownloadUpdate"); return; }
         ProjectManager.SaveProject();
         if (_DeltaUpdate)
         {

@@ -43,11 +43,13 @@ public class LayestaDependsDownloader : MonoBehaviour
     }
     public void StartDownload()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.DownloadFFMpeg"); return; }
         Download.interactable = false;
         StartCoroutine(DownloadCoroutine());
     }
     IEnumerator DownloadCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LayestaDependsDownloader.DownloadCoroutine"); yield break; }
         UnityWebRequest web = new UnityWebRequest("http://layesta.oss-cn-hangzhou.aliyuncs.com/ffmpeg.zip")
         {
             downloadHandler = new DownloadHandlerBuffer()

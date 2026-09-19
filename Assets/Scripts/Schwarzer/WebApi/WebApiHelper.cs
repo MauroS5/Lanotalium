@@ -15,6 +15,7 @@ namespace Schwarzer.Lanotalium.WebApi
         public static string WebApiUri = "https://lanotaliumapi.schwarzer.wang/";
         public static IEnumerator PostObjectCoroutine(string Route, object Object, ObjectWrap<string> Response = null)
         {
+            if (LimOfflineMode.Enabled) { if (Response != null) Response.Reference = string.Empty; LimOfflineMode.LogBlocked("WebApi.PostObjectCoroutine"); yield break; }
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(WebApiUri + Route);
             httpWebRequest.ContentType = "application/json; charset=utf-8";
             httpWebRequest.Method = "POST";
@@ -51,6 +52,7 @@ namespace Schwarzer.Lanotalium.WebApi
         }
         public static async Task<string> PostObjectAsync(string Route, object Object)
         {
+            if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("WebApi.PostObjectAsync"); return null; }
             try
             {
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(WebApiUri + Route);
@@ -80,6 +82,7 @@ namespace Schwarzer.Lanotalium.WebApi
         }
         public static async Task<string> PostStringAsync(string Route, string String)
         {
+            if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("WebApi.PostStringAsync"); return null; }
             try
             {
                 var httpWebRequest = (HttpWebRequest)WebRequest.Create(WebApiUri + Route);
@@ -108,11 +111,13 @@ namespace Schwarzer.Lanotalium.WebApi
         }
         public static IEnumerator PostStringCoroutine(string Route,string String)
         {
+            if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("WebApi.PostStringCoroutine"); yield break; }
             Task<string> task = PostStringAsync(Route, String);
             while (!task.IsCompleted) yield return null;
         }
         public static IEnumerator PostFormCoroutine(string Route, WWWForm Data, ObjectWrap<string> Response = null, Action<float> ProgressCallback = null)
         {
+            if (LimOfflineMode.Enabled) { if (Response != null) Response.Reference = string.Empty; LimOfflineMode.LogBlocked("WebApi.PostFormCoroutine"); yield break; }
             WWW Post = new WWW(WebApiUri + Route, Data);
             while (!Post.isDone)
             {

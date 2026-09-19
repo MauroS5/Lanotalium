@@ -33,6 +33,7 @@ public class LimClickToCreateManager : MonoBehaviour
         {
             if (TunerManager.isInitialized == false) return;
             isEnable = value;
+            IsCreating = value;
             if (value)
             {
                 EnableImg.color = PressedColor;
@@ -85,6 +86,16 @@ public class LimClickToCreateManager : MonoBehaviour
         }
     }
 
+    /// <summary>True while click-to-create owns the left mouse button.</summary>
+    public static bool IsCreating;
+    /// <summary>Attach-to-beatline toggle, readable while dragging notes.</summary>
+    public static bool SnapToBeatline;
+    /// <summary>Attach-to-angleline toggle, readable while dragging notes.</summary>
+    public static bool SnapToAngleline;
+    /// <summary>The angleline tool, shared so dragging can snap to its lines.</summary>
+    public static LimAngleLineManager SharedAnglelineManager;
+    /// <summary>Parent transform used for on-ring preview objects.</summary>
+    public static Transform SharedGhostParent;
     private GameObject NoteCurser;
     private bool isEnable, isAttachToBeatline, isAttachToAngleline;
     private float NoteCursorTiming, NoteCursorDegree;
@@ -92,6 +103,10 @@ public class LimClickToCreateManager : MonoBehaviour
     private void Update()
     {
         if (LimSystem.ChartContainer == null) return;
+        SnapToBeatline = isAttachToBeatline;
+        SnapToAngleline = isAttachToAngleline;
+        SharedAnglelineManager = AnglelineManager;
+        SharedGhostParent = NoteCurserTransform;
         UpdateNoteCurserTransformAndDetectCreate();
         UpdatePointerInfo();
         //DetectHotkeys();
@@ -103,6 +118,7 @@ public class LimClickToCreateManager : MonoBehaviour
     private void OnDisable()
     {
         Enable = false;
+        IsCreating = false;
     }
     public void SetTexts()
     {
@@ -138,99 +154,23 @@ public class LimClickToCreateManager : MonoBehaviour
 
     private float CalculateMovePercent(float Time)
     {
-        int StartScroll = 0, EndScroll = 0;
-        float Percent = 100;
-        for (int i = 0; i < TunerManager.ScrollManager.Scroll.Count - 1; ++i)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[i].Time && TunerManager.ChartTime < TunerManager.ScrollManager.Scroll[i + 1].Time) StartScroll = i;
-            if (Time >= TunerManager.ScrollManager.Scroll[i].Time && Time < TunerManager.ScrollManager.Scroll[i + 1].Time) EndScroll = i;
-        }
-        if (TunerManager.ScrollManager.Scroll.Count != 0)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) StartScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-            if (Time >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) EndScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        }
-        for (int i = StartScroll; i <= EndScroll; ++i)
-        {
-            if (StartScroll == EndScroll) Percent -= (Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-            else if (StartScroll != EndScroll)
-            {
-                if (i == StartScroll) Percent -= (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                else if (i != EndScroll && i != StartScroll) Percent -= (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                else if (i == EndScroll) Percent -= (Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-            }
-        }
-        Percent = Mathf.Clamp(Percent, 0, 100);
-        return Percent;
+        return LimTunerCoordinate.TimeToMovePercent(Time, TunerManager);
     }
     private float CalculateEasedPercent(float Percent)
     {
-        return Mathf.Pow(2, 10 * (Percent / 100 - 1)) * 100;
+        return LimTunerCoordinate.EasedPercent(Percent);
     }
     private float CalculateUnEasedPercent(float Percent)
     {
-        return 1f + 0.1f * (Mathf.Log(Percent) / Mathf.Log(2));
+        return LimTunerCoordinate.UnEasedPercent(Percent);
     }
     private float CalculateCurserTime(float Percent)
     {
-        float EndPercent = Percent;
-        int StartScroll = 0, EndScroll = 0;
-        float StartPercent = 100.0f;
-        for (int i = 0; i < TunerManager.ScrollManager.Scroll.Count - 1; ++i)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[i].Time && TunerManager.ChartTime < TunerManager.ScrollManager.Scroll[i + 1].Time) StartScroll = i;
-        }
-        if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) StartScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        EndScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        int BreakLocation = -1;
-        float Delta = 0, EndTime = 0;
-        for (int i = StartScroll; i <= EndScroll; ++i)
-        {
-            if (StartScroll != EndScroll)
-            {
-                if (i == StartScroll)
-                {
-                    Delta = (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-                else if (i != EndScroll && i != StartScroll)
-                {
-                    Delta = (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-                else if (i == EndScroll)
-                {
-                    Delta = (TunerManager.MediaPlayerManager.Length - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-            }
-        }
-        if (StartScroll == EndScroll)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[EndScroll].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ChartTime;
-            if (EndTime > TunerManager.MediaPlayerManager.Length) return float.NaN;
-            return EndTime;
-        }
-        if (BreakLocation == StartScroll)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[BreakLocation].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ChartTime;
-        }
-        else if (BreakLocation != -1)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[BreakLocation].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ScrollManager.Scroll[BreakLocation].Time;
-        }
-        else if (BreakLocation == -1) return float.NaN;
-        return EndTime;
+        return LimTunerCoordinate.PercentToTime(Percent, TunerManager);
     }
     private float CalculateCurserDegree(Vector3 Position)
     {
-        return 180f - Mathf.Atan2(-Position.x, Position.z) * Mathf.Rad2Deg;
+        return LimTunerCoordinate.ScreenDegree(Position);
     }
     private float CalculateAttachToBeatlineTime(float Time)
     {
@@ -319,6 +259,8 @@ public class LimClickToCreateManager : MonoBehaviour
     private void CreateNoteAtCurser(float Time, float Degree)
     {
         if (!Enable) return;
+        // A paste preview owns the left button while it is on screen.
+        if (LimOperationManager.Instance != null && LimOperationManager.Instance.IsPasting) return;
         int Type = ConvertValueToType(TypeDropdown.value);
         int Size = SizeDropdown.value;
         if (Type == 5)

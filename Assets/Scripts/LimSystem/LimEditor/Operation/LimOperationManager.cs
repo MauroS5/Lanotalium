@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Analytics;
 using UnityEngine.UI;
 using Schwarzer.Lanotalium.WebApi.Analytics;
 
-public class LimOperationManager : MonoBehaviour
+public partial class LimOperationManager : MonoBehaviour
 {
     public static LimOperationManager Instance { get; set; }
     public Camera TunerCamera;
@@ -56,6 +55,8 @@ public class LimOperationManager : MonoBehaviour
     private void Update()
     {
         if (LimSystem.ChartContainer == null) return;
+        DetectClipboard();
+        DetectNoteDrag();
         DetectNoteSelection();
         DetectDeleteRequest();
         DetectUndoRedo();
@@ -65,6 +66,8 @@ public class LimOperationManager : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(0))
         {
+            if (ConsumeDragClick()) return;
+            if (_PasteActive) return;
             Vector3 MousePosition = LimMousePosition.MousePosition;
             Vector3 TunerPosition = new Vector3();
             TunerPosition.x = MousePosition.x - TunerWindowRect.anchoredPosition.x;
