@@ -89,6 +89,7 @@ public class LimCloudManager : MonoBehaviour
     }
     IEnumerator GetLastModifyTimeInternal(string FileName, Text TargetText)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Cloud.GetLastModifyTime"); yield break; }
         WWWForm Form = new WWWForm();
         Form.AddField("UserId", UserId);
         Form.AddField("FileName", FileName);
@@ -120,6 +121,7 @@ public class LimCloudManager : MonoBehaviour
     }
     IEnumerator UploadCoroutine(TransferType Type, string LocalPath = null, byte[] Bytes = null)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Cloud.Upload"); yield break; }
         if (Status != Status.Running) yield break;
         if (LocalPath == null && Bytes == null) yield break;
         ProgressSlider.value = 0;
@@ -163,6 +165,7 @@ public class LimCloudManager : MonoBehaviour
     }
     IEnumerator DownloadCoroutine(TransferType Type)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Cloud.Download"); yield break; }
         WWWForm DownloadForm = new WWWForm();
         DownloadForm.AddField("UserId", UserId);
         switch (Type)
@@ -199,6 +202,7 @@ public class LimCloudManager : MonoBehaviour
 
     IEnumerator BackupLoop()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Cloud.BackupLoop"); yield break; }
         yield return new WaitForSeconds(100);
         while (true)
         {

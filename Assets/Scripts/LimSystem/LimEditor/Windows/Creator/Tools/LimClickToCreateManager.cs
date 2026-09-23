@@ -33,6 +33,7 @@ public class LimClickToCreateManager : MonoBehaviour
         {
             if (TunerManager.isInitialized == false) return;
             isEnable = value;
+            IsCreating = value;
             if (value)
             {
                 EnableImg.color = PressedColor;
@@ -85,27 +86,142 @@ public class LimClickToCreateManager : MonoBehaviour
         }
     }
 
+    /// <summary>The tool itself, so a keyboard shortcut can reach its dropdowns.</summary>
+    public static LimClickToCreateManager Instance;
+    /// <summary>True while click-to-create owns the left mouse button.</summary>
+    public static bool IsCreating;
+    /// <summary>Attach-to-beatline toggle, readable while dragging notes.</summary>
+    public static bool SnapToBeatline;
+    /// <summary>Attach-to-angleline toggle, readable while dragging notes.</summary>
+    public static bool SnapToAngleline;
+    /// <summary>The angleline tool, shared so dragging can snap to its lines.</summary>
+    public static LimAngleLineManager SharedAnglelineManager;
+    /// <summary>Parent transform used for on-ring preview objects.</summary>
+    public static Transform SharedGhostParent;
     private GameObject NoteCurser;
     private bool isEnable, isAttachToBeatline, isAttachToAngleline;
     private float NoteCursorTiming, NoteCursorDegree;
 
+    /// <summary>How far the pointer has to travel before a click becomes a drag.</summary>
+    private const float StretchThresholdPixels = 4f;
+    /// <summary>A rail drawn backwards keeps at least this much length.</summary>
+    private const float MinRailDuration = 0.01f;
+    private Lanotalium.Chart.LanotaHoldNote StretchingRail;
+    private bool StretchStarted;
+    private Vector3 StretchOrigin;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void Update()
     {
         if (LimSystem.ChartContainer == null) return;
+        SnapToBeatline = isAttachToBeatline;
+        SnapToAngleline = isAttachToAngleline;
+        SharedAnglelineManager = AnglelineManager;
+        SharedGhostParent = NoteCurserTransform;
         UpdateNoteCurserTransformAndDetectCreate();
+        UpdateRailStretch();
         UpdatePointerInfo();
-        //DetectHotkeys();
+        DetectHotkeys();
     }
+
+    /// <summary>
+    /// C switches click-to-create on and off. Switching it on also switches
+    /// on both Attach To toggles, which is how notes are placed nearly all of
+    /// the time; switching it off leaves them as they are, so turning one of
+    /// them off by hand only lasts until the next time C is pressed.
+    ///
+    /// Not while typing, and not with Ctrl held down, which is the copy
+    /// shortcut.
+    /// </summary>
     private void DetectHotkeys()
     {
-        if (Input.GetKeyDown(KeyCode.F2)) Enable = !Enable;
+        if (!Input.GetKeyDown(KeyCode.C)) return;
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
+        if (IsTypingInTextField()) return;
+
+        Enable = !Enable;
+        if (Enable)
+        {
+            AttachToBeatline = true;
+            AttachToAngleline = true;
+        }
+    }
+    private static bool IsTypingInTextField()
+    {
+        EventSystem Events = EventSystem.current;
+        if (Events == null || Events.currentSelectedGameObject == null) return false;
+        return Events.currentSelectedGameObject.GetComponent<InputField>() != null;
     }
     private void OnDisable()
     {
         Enable = false;
+        IsCreating = false;
     }
+    /// <summary>
+    /// The number row picks the kind of note the next click will leave
+    /// behind: 1 Click, 2 Flick In, 3 Flick Out, 4 Catch, 5 Rail, which is
+    /// the order the list is in. Handled in LimOperationManagerNoteKeys,
+    /// where the same keys resize a selection while this tool is off.
+    /// </summary>
+    public void SetTypeByNumber(int Number)
+    {
+        if (TypeDropdown == null) return;
+        int Value = Mathf.Clamp(Number - 1, 0, TypeDropdown.options.Count - 1);
+        if (TypeDropdown.value != Value) TypeDropdown.value = Value;
+        TypeDropdown.RefreshShownValue();
+        // The cursor on the ring shows what would be created, so it is made
+        // again whether or not the list decided the value had changed.
+        if (Enable) InstantiateNoteCurser();
+    }
+
+    /// <summary>
+    /// Shift and the number row pick how big the next note will be: 1 is
+    /// size 0, the one Lanota gives a note by default, and 4 is size 3, so
+    /// the four keys read in the order the list does. Handled in
+    /// LimOperationManagerNoteKeys along with the type keys.
+    /// </summary>
+    public void SetSizeByNumber(int Number)
+    {
+        if (SizeDropdown == null) return;
+        int Value = Mathf.Clamp(Number - 1, 0, SizeDropdown.options.Count - 1);
+        if (SizeDropdown.value != Value) SizeDropdown.value = Value;
+        SizeDropdown.RefreshShownValue();
+        // The cursor on the ring is the note that would be created, so it is
+        // made again whether or not the list decided the value had changed.
+        if (Enable) InstantiateNoteCurser();
+    }
+
+    /// <summary>
+    /// The list used to read 0, 2, 3, 4, 5, which are the numbers Lanota
+    /// gives the five kinds of note in its own files. On screen that leading
+    /// zero only made the order look wrong, so the list is numbered 1 to 5
+    /// here, the same numbers the keyboard shortcuts use. The type written
+    /// into the chart is worked out by ConvertValueToType and has not
+    /// changed. Kept to bare digits because the box is eighty pixels wide.
+    /// </summary>
+    private void RemakeTypeDropdown()
+    {
+        if (TypeDropdown == null) return;
+        int Value = TypeDropdown.value;
+        TypeDropdown.options = new List<Dropdown.OptionData>
+        {
+            new Dropdown.OptionData("1"),
+            new Dropdown.OptionData("2"),
+            new Dropdown.OptionData("3"),
+            new Dropdown.OptionData("4"),
+            new Dropdown.OptionData("5")
+        };
+        TypeDropdown.value = Mathf.Clamp(Value, 0, TypeDropdown.options.Count - 1);
+        TypeDropdown.RefreshShownValue();
+    }
+
     public void SetTexts()
     {
+        RemakeTypeDropdown();
         EnableText.text = LimLanguageManager.TextDict["ClickToCreate_Enable"];
         SizeText.text = LimLanguageManager.TextDict["ClickToCreate_Size"];
         TypeText.text = LimLanguageManager.TextDict["ClickToCreate_Type"];
@@ -138,99 +254,23 @@ public class LimClickToCreateManager : MonoBehaviour
 
     private float CalculateMovePercent(float Time)
     {
-        int StartScroll = 0, EndScroll = 0;
-        float Percent = 100;
-        for (int i = 0; i < TunerManager.ScrollManager.Scroll.Count - 1; ++i)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[i].Time && TunerManager.ChartTime < TunerManager.ScrollManager.Scroll[i + 1].Time) StartScroll = i;
-            if (Time >= TunerManager.ScrollManager.Scroll[i].Time && Time < TunerManager.ScrollManager.Scroll[i + 1].Time) EndScroll = i;
-        }
-        if (TunerManager.ScrollManager.Scroll.Count != 0)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) StartScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-            if (Time >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) EndScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        }
-        for (int i = StartScroll; i <= EndScroll; ++i)
-        {
-            if (StartScroll == EndScroll) Percent -= (Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-            else if (StartScroll != EndScroll)
-            {
-                if (i == StartScroll) Percent -= (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                else if (i != EndScroll && i != StartScroll) Percent -= (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                else if (i == EndScroll) Percent -= (Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-            }
-        }
-        Percent = Mathf.Clamp(Percent, 0, 100);
-        return Percent;
+        return LimTunerCoordinate.TimeToMovePercent(Time, TunerManager);
     }
     private float CalculateEasedPercent(float Percent)
     {
-        return Mathf.Pow(2, 10 * (Percent / 100 - 1)) * 100;
+        return LimTunerCoordinate.EasedPercent(Percent);
     }
     private float CalculateUnEasedPercent(float Percent)
     {
-        return 1f + 0.1f * (Mathf.Log(Percent) / Mathf.Log(2));
+        return LimTunerCoordinate.UnEasedPercent(Percent);
     }
     private float CalculateCurserTime(float Percent)
     {
-        float EndPercent = Percent;
-        int StartScroll = 0, EndScroll = 0;
-        float StartPercent = 100.0f;
-        for (int i = 0; i < TunerManager.ScrollManager.Scroll.Count - 1; ++i)
-        {
-            if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[i].Time && TunerManager.ChartTime < TunerManager.ScrollManager.Scroll[i + 1].Time) StartScroll = i;
-        }
-        if (TunerManager.ChartTime >= TunerManager.ScrollManager.Scroll[TunerManager.ScrollManager.Scroll.Count - 1].Time) StartScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        EndScroll = TunerManager.ScrollManager.Scroll.Count - 1;
-        int BreakLocation = -1;
-        float Delta = 0, EndTime = 0;
-        for (int i = StartScroll; i <= EndScroll; ++i)
-        {
-            if (StartScroll != EndScroll)
-            {
-                if (i == StartScroll)
-                {
-                    Delta = (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ChartTime) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-                else if (i != EndScroll && i != StartScroll)
-                {
-                    Delta = (TunerManager.ScrollManager.Scroll[i + 1].Time - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-                else if (i == EndScroll)
-                {
-                    Delta = (TunerManager.MediaPlayerManager.Length - TunerManager.ScrollManager.Scroll[i].Time) * TunerManager.ScrollManager.Scroll[i].Speed * 10 * TunerManager.ChartPlaySpeed;
-                    if (StartPercent - Delta < EndPercent) { BreakLocation = i; break; }
-                    StartPercent -= Delta;
-                }
-            }
-        }
-        if (StartScroll == EndScroll)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[EndScroll].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ChartTime;
-            if (EndTime > TunerManager.MediaPlayerManager.Length) return float.NaN;
-            return EndTime;
-        }
-        if (BreakLocation == StartScroll)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[BreakLocation].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ChartTime;
-        }
-        else if (BreakLocation != -1)
-        {
-            Delta = (StartPercent - EndPercent);
-            EndTime = Delta / (TunerManager.ScrollManager.Scroll[BreakLocation].Speed * 10 * TunerManager.ChartPlaySpeed) + TunerManager.ScrollManager.Scroll[BreakLocation].Time;
-        }
-        else if (BreakLocation == -1) return float.NaN;
-        return EndTime;
+        return LimTunerCoordinate.PercentToTime(Percent, TunerManager);
     }
     private float CalculateCurserDegree(Vector3 Position)
     {
-        return 180f - Mathf.Atan2(-Position.x, Position.z) * Mathf.Rad2Deg;
+        return LimTunerCoordinate.ScreenDegree(Position);
     }
     private float CalculateAttachToBeatlineTime(float Time)
     {
@@ -284,6 +324,9 @@ public class LimClickToCreateManager : MonoBehaviour
         NoteCurser.transform.localScale = new Vector3(Percent / 100, Percent / 100, 0);
         NoteCursorTiming = Time;
         NoteCursorDegree = Degree - TunerManager.CameraManager.CurrentRotation;
+        // Ctrl and the left button drag the tuner around; that click must not
+        // leave a note behind on the way.
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
         if (Distance < 10) if (Input.GetMouseButtonDown(0) && LimMousePosition.IsMouseOverWindow(TunerWindowRect)) CreateNoteAtCurser(NoteCursorTiming, NoteCursorDegree);
     }
     private Vector2 CalculatePointerInfoPosition(Vector2 MousePosition)
@@ -319,6 +362,12 @@ public class LimClickToCreateManager : MonoBehaviour
     private void CreateNoteAtCurser(float Time, float Degree)
     {
         if (!Enable) return;
+        // The cursor's degree has the camera's whole accumulated rotation
+        // taken off it, which can be thousands of degrees by this point in a
+        // chart. The note keeps the place on the circle, written plainly.
+        Degree = LimMathUtil.NormalizeDegree(Degree);
+        // A paste preview owns the left button while it is on screen.
+        if (LimOperationManager.Instance != null && LimOperationManager.Instance.IsPasting) return;
         int Type = ConvertValueToType(TypeDropdown.value);
         int Size = SizeDropdown.value;
         if (Type == 5)
@@ -329,7 +378,9 @@ public class LimClickToCreateManager : MonoBehaviour
             New.Degree = Degree;
             New.Time = Time;
             New.Size = Size;
+            New.Group = LimTimeGroups.ActiveGroup;
             OperationManager.AddHoldNote(New);
+            BeginRailStretch(New);
         }
         else
         {
@@ -338,8 +389,61 @@ public class LimClickToCreateManager : MonoBehaviour
             New.Time = Time;
             New.Degree = Degree;
             New.Size = Size;
+            New.Group = LimTimeGroups.ActiveGroup;
             OperationManager.AddTapNote(New);
         }
+    }
+
+    /// <summary>
+    /// Drawing a rail out with the button still held down.
+    ///
+    /// The click leaves the head where it was clicked and the end of the rail
+    /// follows the pointer until the button comes up: away from the middle it
+    /// grows longer, round the ring it leans, and the two together draw a rail
+    /// running diagonally to wherever it is let go. Letting go without moving
+    /// leaves the one second a rail has always been created with, which is
+    /// what a plain click used to do and still does.
+    ///
+    /// Both ends snap the way a note being placed does, by the same two
+    /// Attach To toggles, so the rail lands between the same lines its head
+    /// did. It stays a plain rail with no joints until it is actually leant
+    /// to one side.
+    ///
+    /// The stretch is part of creating the note: the single undo entry the
+    /// creation already made takes the whole rail away, length, lean and all.
+    /// </summary>
+    private void BeginRailStretch(Lanotalium.Chart.LanotaHoldNote Rail)
+    {
+        StretchingRail = Rail;
+        StretchStarted = false;
+        StretchOrigin = LimMousePosition.MousePosition;
+    }
+
+    private void UpdateRailStretch()
+    {
+        if (StretchingRail == null) return;
+        if (!Input.GetMouseButton(0)) { StretchingRail = null; StretchStarted = false; return; }
+
+        if (!StretchStarted)
+        {
+            // Below this the gesture was a click, not a drag, and the rail
+            // keeps the length it was created with.
+            if (Vector3.Distance(LimMousePosition.MousePosition, StretchOrigin) < StretchThresholdPixels) return;
+            StretchStarted = true;
+        }
+
+        float Time, Degree;
+        if (!LimTunerCoordinate.TryGetChartPointAtMouse(TunerWindowRect, TunerCamera, TunerManager, out Time, out Degree)) return;
+        Time = CalculateAttachToBeatlineTime(Time);
+        Degree = CalculateAttachToAnglelineDegree(Degree);
+
+        // The pointer's degree is the one on screen, which carries the whole
+        // rotation the camera has turned through; the rail is written in the
+        // chart's own. Measured as a turn away from the head so that a rail
+        // drawn across 0 leans the short way round rather than the long way.
+        float Chart = Degree - TunerManager.CameraManager.CurrentRotation;
+        float End = StretchingRail.Degree + Mathf.DeltaAngle(StretchingRail.Degree, Chart);
+        OperationManager.StretchRailEnd(StretchingRail, Mathf.Max(Time, StretchingRail.Time + MinRailDuration), End);
     }
 
     public void OnEnableClick()

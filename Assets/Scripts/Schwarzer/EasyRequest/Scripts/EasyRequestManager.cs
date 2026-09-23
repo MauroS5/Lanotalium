@@ -11,10 +11,10 @@ namespace EasyRequest
 #if UNITY_EDITOR
     public class RequestTest
     {
-        [Name("测试")]
+        [Name("Test")]
         public int TestFieldInt;
 
-        [Name("测试2")]
+        [Name("Test 2")]
         [Range(1, 10)]
         public int TestFieldIntRange;
 

@@ -3,3 +3,7 @@
 /Library/
 /.vs/
 /Temp/
+# Tuner skins are personal (some are paid); only the README is shared.
+/Assets/StreamingAssets/TunerSkin/*
+!/Assets/StreamingAssets/TunerSkin/README.txt
+!/Assets/StreamingAssets/TunerSkin/README.txt.meta

@@ -146,7 +146,7 @@ public class ComponentHoldNoteManager : MonoBehaviour
     public void OnDurationChange()
     {
         float DurationTmp;
-        if (!float.TryParse(Duration.text, out DurationTmp))
+        if (!LimNumber.TryParseFloat(Duration.text, out DurationTmp))
         {
             DurationImg.color = InvalidColor;
             return;

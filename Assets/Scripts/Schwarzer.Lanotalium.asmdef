@@ -5,7 +5,8 @@
         "Schwarzer.Chart",
         "Schwarzer.WebApi",
         "Schwarzer.Unity",
-        "Schwarzer.StringReader"
+        "Schwarzer.StringReader",
+        "Lanotalium.Offline"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

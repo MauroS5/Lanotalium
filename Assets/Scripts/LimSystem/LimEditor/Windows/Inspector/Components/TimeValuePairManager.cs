@@ -73,7 +73,7 @@ public class TimeValuePairManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float TimingTmp;
-        if (!float.TryParse(Time.text, out TimingTmp))
+        if (!LimNumber.TryParseFloat(Time.text, out TimingTmp))
         {
             TimeImg.color = InvalidColor;
             return;
@@ -102,7 +102,7 @@ public class TimeValuePairManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float ValueTmp;
-        if (!float.TryParse(Value.text, out ValueTmp))
+        if (!LimNumber.TryParseFloat(Value.text, out ValueTmp))
         {
             ValueImg.color = InvalidColor;
             return;

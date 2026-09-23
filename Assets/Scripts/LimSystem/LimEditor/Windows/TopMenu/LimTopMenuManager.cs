@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class LimTopMenuManager : MonoBehaviour
+public partial class LimTopMenuManager : MonoBehaviour
 {
     public LimProjectManager ProjectManager;
     public WindowsDialogUtility DialogUtility;
@@ -25,6 +25,10 @@ public class LimTopMenuManager : MonoBehaviour
     private void Start()
     {
         LimTutorialManager.ShowTutorial("FirstProject1");
+        SetUpAnalyzer();
+        SetUpUiTweakMenu();
+        SetUpResetLayoutConfirm();
+        SetUpLanguageMenu();
         if (LimSystem.ChartContainer == null) return;
         TopText.text = $"Lanotalium - <{LimProjectManager.CurrentProject.Name}>";
     }
@@ -46,9 +50,9 @@ public class LimTopMenuManager : MonoBehaviour
         SettingText.text = LimLanguageManager.TextDict["TopMenu_Setting"];
         PreferencesText.text = LimLanguageManager.TextDict["TopMenu_Setting_Preferences"];
         ResetLayoutText.text = LimLanguageManager.TextDict["TopMenu_Setting_ResetLayout"];
-        ChartConvertText.text = LimLanguageManager.TextDict["TopMenu_ChartConvert"];
-        ChartConvertArcaeaText.text = LimLanguageManager.TextDict["TopMenu_ChartConvert_Arcaea"];
-        ChartConvertBmsText.text = LimLanguageManager.TextDict["TopMenu_ChartConvert_Bms"];
+        SetAnalyzerTexts();
+        SetUiTweakTexts();
+        ShowLanguageFlag();
         ChartZoneText.text = LimLanguageManager.TextDict["TopMenu_ChartZone"];
         StatusText.text = LimLanguageManager.TextDict["TopMenu_Status"];
     }

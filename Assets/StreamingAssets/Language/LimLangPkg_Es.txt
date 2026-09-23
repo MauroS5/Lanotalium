@@ -1,0 +1,559 @@
+﻿!Español
+#TextDict
+Window_Tuner_Label$Tuner
+Window_Tuner_Skin$Skin
+Window_Tuner_Capturer$Capturer
+Window_Tuner_FullScreen$Completa
+Window_Tuner_Head_Designer$Autor del chart
+Window_Tuner_Motion$Motion del Tuner
+Window_Tuner_StretchBGA$Estirar BGA
+Window_Tuner_ChartSpeed$Chart Speed
+Window_Inspector_Label$Inspector
+Window_Inspector_Switcher_Bpm$BPM
+Window_Inspector_Switcher_Scroll$Scroll Speed
+Window_Inspector_Switcher_Default$Por defecto
+Window_Inspector_Switcher_TimeGroups$Time Groups
+TimeGroups_Label$Time Groups
+TimeGroups_NewName$Grupo
+TimeGroups_Base$Base
+TimeGroups_Add$+ Grupo
+TimeGroups_MoveSelected$Mover selección aquí
+TimeGroups_Effects_On$Efectos de grupo: Sí
+TimeGroups_Effects_Off$Efectos de grupo: No
+TimeGroups_BaseHasNoEffects$Base se mueve con el chart. Crea un grupo o pulsa Editar en uno para darle efectos.
+TimeGroups_Opacity$Opacidad en el tiempo
+TimeGroups_Rotation$Rotación del grupo
+TimeGroups_AddOpacity$+ Opacidad
+TimeGroups_AddRotation$+ Rotación
+TimeGroups_Col_Timing$Timing
+TimeGroups_Col_Duration$Duration
+TimeGroups_Col_Opacity$Opacidad
+TimeGroups_Col_Degrees$Grados
+TimeGroups_Col_Ease$Ease
+TimeGroups_Fade$Fundido por distancia (% del recorrido)
+TimeGroups_FadeIn$Visible del todo desde
+TimeGroups_FadeOut$Empieza a desaparecer en
+TimeGroups_Color$Color del grupo
+TimeGroups_NoColor$Ninguno
+TimeGroups_Hex$Hex RRGGBB
+TimeGroups_ColorHighlight$Highlight
+TimeGroups_ColorNotes$Notas
+TimeGroups_Msg_KeyExists$Este grupo ya tiene una clave en este momento.
+TimeGroups_Msg_AlreadyThere$Las notas seleccionadas ya están en este grupo.
+TimeGroups_Active$Activo
+TimeGroups_Select$Editar
+TimeGroups_Visible$Visible
+TimeGroups_Hidden$Oculto
+TimeGroups_ScrollSpeedOf$Scroll Speed:
+TimeGroups_AddSpeed$+ Velocidad
+TimeGroups_Msg_Moved$Notas movidas al grupo activo.
+TimeGroups_Msg_NothingSelected$Selecciona alguna nota primero.
+TimeGroups_Msg_SpeedExists$Este grupo ya tiene una velocidad en este momento.
+TimeGroups_Msg_ConfirmDelete$Pulsa borrar otra vez para quitar el grupo y todas sus notas. Ctrl + Z lo recupera.
+Window_MediaPlayer_Label$Reproductor
+Window_MediaPlayer_Progress$Progreso
+Window_MediaPlayer_PlaybackSpeed$Velocidad
+Window_MediaPlayer_Pitch$Tono
+Window_MediaPlayer_Volume$Volumen
+Window_MediaPlayer_PitchReset$Restablecer
+Window_MediaPlayer_Play$Reproducir
+Window_MediaPlayer_Pause$Pausar
+Window_MediaPlayer_Stop$Detener
+Window_MediaPlayer_PreciseControl$Controlador de modo preciso
+Window_MediaPlayer_Offset$Offset
+Window_MediaPlayer_SwitchPlayerMode$Cambiar modo
+Window_MediaPlayer_FixTime$Fix Time
+Window_MediaPlayer_Precise$Preciso
+Window_MediaPlayer_Sync$Sincronizar
+Window_TimeLine_Label$TimeLine
+Window_TimeLine_Hor_Label$Motion (Horizontal)
+Window_TimeLine_Ver_Label$Motion (Vertical)
+Window_TimeLine_Rot_Label$Motion (Rotación)
+Window_TimeLine_Trs_Label$Motion (Transparencia)
+Window_TimeLine_WaveformL$Onda L
+Window_TimeLine_WaveformR$Onda R
+Window_TimeLine_Waveform$Forma de onda
+Window_TimeLine_SyncZoom$Sincronizar
+Window_TimeLine_Waveform_LowMemory$Forma de onda desactivada por el límite de memoria de 32 bits.
+Window_Creator_Label$Creator
+Window_Creator_CreateTap$Crear nota Tap
+Window_Creator_CreateHold$Crear nota Hold
+Window_Creator_CreateMotionHor$Crear Motion (Horizontal)
+Window_Creator_CreateMotionVer$Crear Motion (Vertical)
+Window_Creator_CreateMotionRot$Crear Motion (Rotación)
+Window_Creator_CreateMotionTrs$Crear Motion (Transparencia)
+Window_Creator_CreateMotionManually$Crear Motion (Manual)
+Window_Creator_CreateBpm$Crear BPM
+Window_Creator_CreateScrollSpeed$Crear Scroll Speed
+Window_Creator_CreateCatchRail$Crear Catch Rail
+Window_Creator_CreateCatchRail_Quantity$Cantidad
+Window_Creator_CreateCatchRail_ErrSelection$Tienes que seleccionar dos notas cortas.
+Window_Creator_CreateCatchRail_ErrQuantity$Tienes que introducir una cantidad válida.
+Window_Creator_CreateCatchRail_ErrRange$Tienes que introducir un número mayor que 0.
+Window_Creator_CreateCatchRail_Success$Creado correctamente.
+Window_Creator_CreateGroupEase$Crear ease de grupo
+Window_Creator_CreateGroupEase_Ease$Ease
+Window_Creator_CreateGroupEase_ErrEase$Escribe un ease del 0 al 12. El 0 deja las notas en línea recta.
+Window_Creator_CreateGroupEase_ErrSelection$Selecciona antes tres notas o más, en tiempos distintos.
+Window_Creator_CreateGroupEase_Success$Ease aplicado al grupo.
+Window_Creator_SegmentRail$Segmentar nota Hold
+Window_Creator_SegmentRail_Segments$Segmentos
+Window_Creator_SegmentRail_ErrSegments$Escribe en cuántas partes, del 2 al 64.
+Window_Creator_SegmentRail_ErrSelection$Selecciona antes una sola nota Rail y nada más.
+Window_Creator_SegmentRail_Success$Nota Rail segmentada.
+Window_Creator_RailEase$Aplicar ease a Rail
+Window_Creator_RailEase_Ease$Ease
+Window_Creator_RailEase_ErrEase$Escribe un ease del 0 al 12. El 0 es el recto.
+Window_Creator_RailEase_ErrSelection$Selecciona antes una o varias notas Rail que tengan joints.
+Window_Creator_RailEase_Success$Ease aplicado a todos los joints de las rails seleccionadas.
+Window_Creator_CreateCatchRail_Reverse$Invertir
+Window_Creator_CreateCatchRail_Spins$Giros
+Window_Creator_ConvertToSingleHoldNote$Convertir en una sola Hold
+Window_Creator_ConvertToSingleHoldNote_Err$Selecciona dos o más notas hold, y nada más.
+Window_Creator_ConvertToSingleHoldNote_Success$Notas hold unidas en una sola.
+Window_Creator_ConvertSelectedToHoldNote$Convertir en nota Hold
+Window_Creator_AutoHighlight$Resaltado automático
+Window_Creator_FlipHorizontal$Invertir (Horiz.)
+Window_Creator_FlipVertical$Invertir (Vert.)
+Window_Creator_SelectEven$Seleccionar pares
+Window_Creator_SelectOdd$Seleccionar impares
+Window_Creator_DeleteSelected$Eliminar selección
+Window_Creator_ClickToCreate$Click To Create
+Window_Creator_Favourites$Grupos favoritos
+Window_Creator_Favourites_Notes$Notas
+Window_Creator_Favourites_Motions$Movimientos
+Favourites_File_Title$Archivo de favoritos
+Favourites_File_Filter$Favoritos de Lanotalium (*.json)|*.json
+Window_Creator_Angleline$Angleline
+Window_Creator_Grid$Malla
+Window_Creator_Grid_Vertical$V.
+Window_Creator_Grid_Horizontal$H.
+Window_Creator_Grid_Placeholder$Introducir valor
+Window_Creator_Opacity$Opacidad
+Window_Creator_Copier$Copier
+Component_Basic_Label$Básico
+Component_Basic_Size$Tamaño
+Component_Basic_Timing$Timing
+Component_Basic_Degree$Degree
+Component_Basic_Combination$Combination
+Component_Type_Label$Tipo
+Component_Type_Type$Tipo
+Component_Type_DropDown_Type0$1 - Click
+Component_Type_DropDown_Type2$2 - Flick In
+Component_Type_DropDown_Type3$3 - Flick Out
+Component_Type_DropDown_Type4$4 - Catch
+Component_Type_DropDown_Type5$5 - Rail
+Component_HoldNote_Label$Nota Hold
+Component_HoldNote_Duration$Duración
+Component_HoldNote_JCount$Número de Joints
+Component_HoldNote_Joints$Joints
+Component_HoldNote_Joints_Mode_Absolute$Absoluto
+Component_HoldNote_Joints_Mode_Chained$Encadenado
+Component_HoldNote_Joints_Degree$Degree final
+Component_HoldNote_Joints_Time$Tiempo final
+Component_HoldNote_Joints_Ease$Ease
+Component_Basic_Degree_Absolute$Absoluto
+Component_Motion_Label$Motion
+Component_Motion_Timing$Timing
+Component_Motion_Duration$Duración
+Component_Motion_Cfmi$Ease
+Component_Motion_Ctp0$Ctp0
+Component_Motion_Ctp1$Ctp1
+Component_Motion_Type$Tipo
+Component_Motion_InvertValues$Invertir valores
+Component_Motion_Ctp0_Tp8$Delta Degree
+Component_Motion_Ctp1_Tp8$Delta Radio
+Component_Motion_Ctp0_Tp11$Degree objetivo
+Component_Motion_Ctp1_Tp11$Radio objetivo
+Component_Motion_Ctp0_Tp10$Delta Altura
+Component_Motion_Ctp1_Tp10$Ninguno
+Component_Motion_Ctp0_Tp13$Degree de rotación
+Component_Motion_Ctp1_Tp13$Ninguno
+Component_Motion_Ctp0_Tp14$Transparencia (0-100)
+Component_Motion_Ctp1_Tp14$Ninguno
+Component_Motion_ManuallyMotion$Motion manual
+Component_Motion_Unavaliable$No disponible
+Component_Bpm_Label$BPM
+Component_Bpm_Timing$Timing
+Component_Bpm_Bpm$BPM
+Component_Bpm_Beatline$Beatline
+Component_Bpm_Density$Densidad
+Component_Bpm_FixSelected$Corregir selección
+Component_Bpm_FixAll$Corregir todo
+Component_ScrollSpeed_Label$Scroll Speed
+Component_ScrollSpeed_Timing$Timing
+Component_ScrollSpeed_Speed$Velocidad
+Component_ScrollSpeed_ChartSpeed$Chart Speed
+Component_Default_Label$Motion por defecto
+Component_Default_Radius$Radio inicial
+Component_Default_Degree$Degree inicial
+Component_Default_Height$Altura inicial
+Component_Default_Rotation$Rotación inicial
+Preferences_Label$Preferencias
+Preferences_Language$Idioma
+Preferences_Autosave$Autoguardado
+Preferences_JudgeColor$Color del Judge
+Preferences_AudioEffect$Efectos de audio
+Preferences_AudioEffectTheme$Tema de efectos
+Preferences_Unsafe$Motion insegura
+Preferences_WorkingBGM$BGM en pausa
+Preferences_Waveform$Forma de onda
+Preferences_WaveformColor$Color de la onda
+Preferences_WaveformColor_Cyan$Cian
+Preferences_WaveformColor_Red$Rojo
+Preferences_WaveformColor_Yellow$Amarillo
+Preferences_WaveformColor_LightGreen$Verde claro
+Preferences_WaveformColor_DarkGreen$Verde oscuro
+Preferences_WaveformColor_Pink$Rosa
+Preferences_WaveformColor_Lilac$Lila
+Preferences_WaveformColor_DarkBlue$Azul oscuro
+Preferences_WaveformColor_Orange$Naranja
+Preferences_WaveformColor_White$Blanco
+Preferences_Theme$Tema
+Preferences_Theme_Default$Predeterminado
+Preferences_Theme_Dark$Oscuro
+Preferences_Theme_Light$Claro
+Preferences_RailNoteVisualGuide$Guías visuales de Rail
+Preferences_TunerBackgroundOpacity$Opacidad del fondo del afinador
+TopMenu_ChartZone$ChartZone
+TopMenu_ChartZone_MessageBox$Se perderá todo lo que no hayas guardado; asegúrate de haber guardado.
+TopMenu_File$Archivo
+TopMenu_File_NewProject$Nuevo proyecto...
+TopMenu_File_OpenProject$Abrir proyecto...
+TopMenu_File_SaveProject$Guardar proyecto
+TopMenu_File_SaveAsProject$Guardar como chart
+TopMenu_File_Release$Generar release
+TopMenu_File_Exit$Salir
+TopMenu_Window$Ventana
+TopMenu_Window_Inspector$Inspector
+TopMenu_Window_Tuner$Tuner
+TopMenu_Window_TimeLine$TimeLine
+TopMenu_Window_MediaPlayer$Reproductor de música
+TopMenu_Window_Creator$Creator
+TopMenu_Window_Spectrum$Espectro
+TopMenu_Setting$Ajustes
+TopMenu_Setting_Preferences$Preferencias
+TopMenu_Setting_ResetLayout$Restablecer disposición del editor
+TopMenu_Setting_ResetLayout_Confirm$¿Seguro que quieres restablecer la disposición del editor? Todas las ventanas volverán a su tamaño y posición por defecto.
+TopMenu_Plugin$Plugins
+TopMenu_Plugin_PluginCenter$Centro de plugins
+TopMenu_Analyzer$Analyzer
+TopMenu_Analyzer_Automatic$Automatic
+TopMenu_Analyzer_Manual$Manual
+TopMenu_UiTweak$UiTweak
+UiTweak_NoteEffects$Efectos de notas
+UiTweak_ComboCounter$Contador de combo
+UiTweak_FlickArrows$Flechas en los Flick
+UiTweak_JudgeOrnaments$Adornos del Judge
+UiTweak_Wave$Onda y partículas del fondo
+UiTweak_LanotaHeader$Cabecera de Lanota
+UiTweak_ShowScore$Mostrar Score
+UiTweak_PerfectPurified$Perfect Purified al final
+UiTweak_ReadyIntro$Ready al empezar
+UiTweak_HdRails$Rails HD
+UiTweak_HdCore$Núcleo HD
+UiTweak_ProgressBar$Barra de progreso
+UiTweak_CustomDifficulty$Dificultad personalizada…
+Header_CustomDifficulty$Dificultad personalizada
+Header_ApplyColour$Aplicar color
+UiTweak_CompactHighlight$Highlight compacto
+UiTweak_TunerSkin$Skin del afinador
+UiTweak_TunerSkin_Ritmo$Ritmo
+UiTweak_TunerSkin_Fisica$Física
+UiTweak_Credit$UiTweak por Flowaria
+Analyzer_NoMusic$Este proyecto no tiene canción que analizar.
+Analyzer_Failed$No se ha podido encontrar el BPM de esta canción. Prueba con el modo Manual.
+Analyzer_Applied$BPM {0} aplicado. La primera línea está en {1} s.
+Analyzer_AppliedAll$Aplicados {0} tramos de BPM. La primera línea está en {1} s.
+Analyzer_ChangesFound$Se han detectado uno o más cambios de BPM en esta canción. ¿Quieres que el analizador tenga en cuenta esos cambios?
+Analyzer_ChangeAt${0} → {1} BPM en {2} s
+Analyzer_ApplyAll$Aplicar todos los BPM
+Analyzer_KeepOriginal$Mantener BPM original
+Analyzer_Manual_Title$Analyzer · Manual
+Analyzer_Manual_Tap$Presiona al ritmo
+Analyzer_Manual_FirstPress$Pulsa la primera vez para reproducir la canción
+Analyzer_Manual_Taps$Toques: {0}
+Analyzer_Manual_Pause$Pausa
+Analyzer_Manual_Bpm$BPM
+Analyzer_Manual_Timing$Timing
+Analyzer_Manual_Apply$Aplicar BPM
+Analyzer_Manual_Invalid$Escribe un BPM mayor que 0 y un Timing dentro de la canción.
+Analyzer_Manual_Applied$BPM {0} aplicado desde {1} s.
+TopMenu_Status$Estado
+GizmoMotion_Label$Motion manual
+GizmoMotion_ToCreate$Tipos de Motion a crear
+GizmoMotion_EditMode$Modo de edición
+GizmoMotion_From$Desde
+GizmoMotion_To$Hasta
+GizmoMotion_Radius$Radio
+GizmoMotion_Degree$Degree
+GizmoMotion_Height$Altura
+GizmoMotion_Rotation$Rotación
+GizmoMotion_Time$Tiempo
+GizmoMotion_With$Con
+GizmoMotion_Ease$Ease
+GizmoMotion_Duration$Duración
+GizmoMotion_Apply$Aplicar
+ClickToCreate_Enable$Activar
+ClickToCreate_Size$Tamaño
+ClickToCreate_Type$Tipo
+ClickToCreate_AttachTo$Ajustar a
+ClickToCreate_Beatline$Beatline
+ClickToCreate_Angleline$Angleline
+ClickToCreate_Timing$Timing
+ClickToCreate_Degree$Degree
+ClickToCreate_Deltatime$Delta
+Copier_CopyNote$Copiar nota(s) seleccionada(s)
+Copier_CopyMotion$Copiar Motion seleccionada
+Copier_Msg_Success$Copiado correctamente
+Copier_Hint$Tiempo objetivo. Ejemplo: 1;2;4+0.1*3 equivale a 1;2;4;4.1;4.2;4.3
+Capturer_Label$Capturer
+Capturer_Resolution$Resolución
+Capturer_FrameRate$Fotogramas por segundo
+Capturer_Export$Exportar
+Plugin_NotFound$Plugin no encontrado.
+Plugin_NotValid$Plugin no válido / no descargado / necesita actualizarse. Descárgalo en el Centro de plugins.
+Plugin_LoadNotComplete$La carga de plugins no ha terminado, espera un momento.
+Plugin_Download$Descargar
+Plugin_Complete$Completado
+Plugin_Center_Label$Centro de plugins
+Cloud_Cloud$Nube
+Cloud_Backup$Copia de seguridad
+Cloud_Backuping$Creando copia de seguridad
+Cloud_Uploading$Subiendo
+Cloud_Downloading$Descargando
+Cloud_CloudAutosave$Autoguardado en la nube
+Cloud_Chart_Label$Chart
+Cloud_GetMTime_Label$Guardado en la nube:
+Cloud_GetMTime_NotUploadedBefore$No subido anteriormente
+Cloud_Error_UnsupportUserId$Error: ID de usuario no admitido
+Cloud_Error_NetworkNotReachable$Error: red no disponible
+Cloud_Error_NoProjectLoaded$Error: ningún proyecto cargado
+Project_LoadFilter$Proyecto de Lanotalium(*.lap)|*.lap
+Project_Saved$Guardado correctamente.
+Project_InvalidProject$¡Proyecto no válido!
+Project_InvalidProjectFile$¡Archivo de proyecto no válido!
+Project_NoName$¡Tienes que introducir un nombre!
+Project_NoDesigner$¡Tienes que introducir un autor!
+Project_ReadChartFailed$No se ha podido leer el chart, ¡comprueba que sea válido!
+Project_ReadImageFailed$No se han podido leer las imágenes, ¡comprueba que sean válidas!
+Project_ReadMusicFailed$No se ha podido leer la música, ¡comprueba que sea válida!
+Project_ChartWillGenerate$Se ha generado un chart vacío; también puedes seleccionar uno que ya tengas.
+Project_FolderLabel$Carpeta del proyecto
+Project_Name$Nombre
+Project_Designer$Autor
+Project_Music$Ruta de la música
+Project_Chart$Ruta del chart
+Project_BGA$Imagen de fondo
+Project_WizardLabel$Asistente de proyecto
+Project_Open_Create$Crear
+Project_Open_Open$Abrir
+Project_NoBGA$¡Hay que añadir al menos una imagen de fondo!
+ChartZone_Rating_You$Tú
+ChartZone_Rating_Online$Valoración
+ChartZone_Head$Chart Zone
+ChartZone_ChartName$Nombre del chart
+ChartZone_Designer$Autor
+ChartZone_Notes$Notas
+ChartZone_Download$Descargar
+ChartZone_Video$Vídeo
+ChartZone_Rating$Valoración
+ChartZone_CopyRight$Salvo el autor, no se permite grabar los charts de aquí y subirlos a webs de vídeo<br><size=25>Los charts de baja calidad no se recopilarán.</size><br><size=25><color=#FFE57AFF>Pulsa la barra superior para ordenar.</color></size>
+WhatsNew_Label$Novedades
+WhatsNew_Toggle$No volver a mostrar.
+Spectrum_Name$Espectro
+Exception_QueuedCount$Se han producido {0} excepciones más.
+Exception_Next$Siguiente
+Exception_Restart$Guardar y reiniciar Lanotalium
+Exception_Ignore$Ignorar y seguir trabajando
+Exception_Exception$Excepción
+Updator_Update$Actualizar
+Updator_DoUpdate$Guardar y actualizar Lanotalium
+Updator_Ignore$Ignorar y seguir trabajando
+Updator_DeltaFileSize$Tamaño del archivo: {0}
+Updator_FullFileSize$Tamaño del archivo: {0}
+ChartConverting_BmsTitle$Selecciona un chart Bms
+ChartConverting_BmsExtension$Chart Bms(*.bms,*.bme,*.bml,*.pms)|*.bms;*.bme;*.bml;*.pms
+Status$Estado
+Status_LoadProject$Carga un proyecto primero
+Status_TunerStatus$Estado del Tuner
+Status_Rotation$Rotación
+Status_Height$Altura
+Status_Coordinate_Polar$Posición en (ρ,θ)
+Status_Coordinate_Rect$Posición en (x,y)
+Status_ChartStatus$Estado del chart
+Status_TapNote$Notas Tap
+Status_HoldNote$Notas Hold
+Status_CurrentBpm$BPM actual
+Status_CurrentSpeed$Velocidad actual
+Submit_TimeLimit$Solo puedes crear un chart cada 24 horas.
+Submit_TooManyPending$Tienes demasiados envíos pendientes.
+Submit_MySubmit$Mis envíos
+Submit_NewSubmit$Nuevo envío
+Submit_ChartZone$Enviar a ChartZone
+Submission_Accepted$Aceptado
+Submission_Modified$Pendiente de nuevo
+Submission_NotUploaded$No subido
+Submission_Pending$Pendiente
+Submission_Rejected$Rechazado
+Submission_Upload$Subir
+Submission_File_Title$Sube un Zip con el chart, la música, los fondos y el archivo de proyecto.
+Submission_ChartName$Nombre del chart
+Submission_Designer$Autor
+Submission_NoteCount$Número de notas
+Submission_UploadRequest$Sube un Zip con el chart, la música, los fondos y el archivo de proyecto. Tamaño máximo 16MB.
+Submission_ConfirmDelete$¿Confirmas que quieres borrarlo? Esto no se puede deshacer.
+Error_Network$Error de red
+Layesta_Download$Descargar
+Layesta_Download_Hint$Layesta necesita algunas dependencias para funcionar.
+Layesta_NoProject$Carga un proyecto primero.
+Layesta_Export$Exportar nivel de Layesta
+Layesta_Send_Hint$Enviar el proyecto actual a este dispositivo
+Layesta_Overwrite$Regenerar audio e imágenes
+Layesta_Send$Enviar
+Layesta_1$Codificando fondos
+Layesta_2$Convirtiendo audio
+Layesta_3$Aplicando desenfoque
+Layesta_4$Finalizando
+Layesta_5$Enviando
+Layesta_Build_Window$Guardar en un archivo .layesta
+Layesta_Build_Title$Generar archivo <color=#459bff>.layesta</color>
+Layesta_Build$Generar
+Layesta_Build_Artist$Artista
+Layesta_Build_Designer$Autor
+Layesta_Build_Chart$Chart
+Layesta_Build_Chart_AddFile$Añadir archivo
+Layesta_Build_Chart_AddThis$Añadir el actual
+Layesta_Build_Chart_Difficulty$Dificultad
+Layesta_Build_Chart_Delete$Eliminar
+Layesta_Build_Name$Nombre
+EasyRequest_Title_Default$Introduce los datos
+EasyRequest_PrimitiveTypes$<color=red>Error:</color> ¡<color=yellow>obj</color> no debería ser de un tipo primitivo!
+EasyRequest_Cancel$Cancelar
+EasyRequest_Confirm$Confirmar
+Plugin_Title_Default$Pulsa el nombre del plugin para ver su descripción.
+Plugin_Exception$¡El plugin en ejecución ha lanzado una excepción!
+Layesta_Submission_Online$Descargas: {0}
+Layesta_Submission_User_Register$Registrarse
+Layesta_Submission_User_Login$Iniciar sesión
+Layesta_Submission_User_Username$Usuario
+Layesta_Submission_User_Password$Contraseña
+Layesta_Submission_User_ConfirmPassword$Confirmar contraseña
+Layesta_Submission_User_Email$Correo electrónico
+Layesta_Submission_User_Switch_Login$Cambiar a iniciar sesión
+Layesta_Submission_User_Switch_Register$Cambiar a registrarse
+Layesta_Submission_User_InvalidToken$El token ha caducado, vuelve a iniciar sesión.
+Layesta_Submission_User_Wait$Espera un momento.
+Layesta_Submission_ConfirmDelete$¿Seguro? Esto es irreversible y borrará todos los archivos del servidor. <color=orange>Nota: si solo quieres actualizarlo, vuelve a subir el archivo nuevo directamente, no hace falta borrarlo.</color>
+Layesta_Submission_Save$Guardar archivo .layesta.
+Layesta_Submission_Load$Cargar archivo .layesta.
+Layesta_Submission_Upload1$Preparando la subida.<br>
+Layesta_Submission_Upload2$Obteniendo la URL de subida del nivel layesta.<br>
+Layesta_Submission_Upload3$Obteniendo la URL de subida de la portada.<br>
+Layesta_Submission_Upload4$Subiendo el nivel layesta...<br>
+Layesta_Submission_Upload5$Subiendo la portada...<br>
+Layesta_Submission_Upload6$Subiendo la información del nivel...<br>
+Layesta_Submission_Upload7$Listo.
+Layesta_Submission_UploadErr1$Archivo no válido.<br>
+Layesta_Submission_UploadErr2$Error al subir.<br>
+Layesta_Submission_UploadErr3$Falta información, subida denegada.<br>
+Layesta_Submission_Upload_Text$Subir
+Layesta_Submission_Download_Text$Descargar
+Layesta_Submission_Delete_Text$Eliminar
+Layesta_Submission_Available_Text$Público
+Layesta_Submission_Participant_Text$Participante del concurso 2019S1
+Layesta_Submission_UploadFirst$Primero tienes que subirlo
+Layesta_Submission_WarnParticipant$Aviso: una vez te apuntes, no podrás desmarcarlo.
+Layesta_Submission_IntervalLimit$Solo puedes crear 1 nivel cada 24 horas.
+Window_Tuner_Demo$Demo
+Layesta_Contest_Warn$Si quieres participar en el concurso, pon como nombre de charter 'Hidden' u otro que no revele tu identidad real.
+#NotificationDict
+Motion_TimeExisted$(Tiempo no válido) Ya hay una Motion en el tiempo actual. No se ha podido crear.
+Motion_InPrevious$(Tiempo no válido) El tiempo actual está dentro de la duración de la Motion anterior. No se ha podido crear.
+Motion_DurationOverflow$(Duración no válida) El tiempo actual + la duración supera la siguiente Motion. No se ha podido crear.
+Favourite_Saved$Guardado en favoritos.
+Favourite_Nothing$Selecciona antes notas o motions.
+Favourite_Mixed$Guarda notas o motions, no las dos cosas a la vez.
+Favourite_TooMany$Demasiadas notas: 100 como mucho en un patrón.
+Favourite_ConfirmForget$Pulsa otra vez para eliminar este patrón.
+Favourite_Exported$Favoritos guardados en un archivo.
+Favourite_Imported$Favoritos añadidos desde el archivo.
+Favourite_FileFailed$No se ha podido leer o escribir ese archivo.
+Background_VideoWarning$Si el chart y el audio no están sincronizados, ajusta el offset y pulsa Fix Time.
+Project_Saved$Guardado.
+#HintDict
+ClickToCreate_Hotkey$Pulsa C para activarlo rápido
+Angleline_Hint$Formato<br>Individual: introdúcelo directamente. <br>Por lotes: [Inicio]>[Fin]/[Cantidad]<br>0>30/5 significa 0,6,12,18,24,30<br>Sepáralos con ; (0;2;0>15/3)
+Copier_Hint$Formato<br>Individual: introdúcelo directamente. <br>Por lotes: [Inicio]+[Intervalo]*[Veces]<br>15+0.1*5 significa 15 15.1 15.2 15.3 15.4 15.5<br>Sepáralos con ; (10;30;50+0.5*5)
+Layesta_Play_Hint$Pulsa para cargar el proyecto actual en este dispositivo
+GizmoMotion_Tp8$Motion (Horizontal) - Espiral
+GizmoMotion_Tp11$Motion (Horizontal) - Recta
+GizmoMotion_Tp10$Motion (Vertical)
+GizmoMotion_Tp13$Motion (Rotación)
+GizmoMotion_MoveMode$Botón izquierdo para arrastrar. Rueda para mover en vertical. Ctrl para ir más rápido.
+GizmoMotion_RotateMode$Arrastra alrededor del Tuner para rotar. Ctrl para ir más rápido.
+GizmoMotion_InputMode$Introduce los valores directamente para fijar la posición. Deselecciona TODOS los modos para activar la motion.
+EaseRange$Ease: número entero de 0 a 12.
+TimeGroups_Hint_Move$Mete las notas seleccionadas en el grupo activo (el marcado como Activo).
+TimeGroups_Hint_Effects$Sí: cada grupo se mueve, gira y se funde como se verá en el chart.<br>No: todas las notas se mueven con el chart y sin girar,<br>así quedan justo donde las colocas o arrastras,<br>y las notas ocultas se ven tenues para poder seleccionarlas.
+TimeGroups_Hint_Edit$Convierte este grupo en el activo: las notas nuevas van a él,<br>y sus ajustes se muestran debajo.
+TimeGroups_Hint_Opacity$Añade una clave en la posición de reproducción. Cada clave funde las notas<br>del grupo desde donde estaban hasta su Opacidad (0 invisible, 100 del todo),<br>durante su Duration, con su Ease.
+TimeGroups_Hint_Rotation$Añade una clave en la posición de reproducción. Cada clave gira las notas<br>del grupo alrededor del núcleo sus Grados, durante su Duration, con su Ease.<br>Las claves se suman, como un motion de rotación.
+TimeGroups_Hint_FadeIn$Las notas aparecen poco a poco desde el núcleo y se ven del todo<br>al llegar a este punto de su recorrido. 0 lo desactiva.
+TimeGroups_Hint_FadeOut$Las notas empiezan a desaparecer en este punto de su recorrido<br>y se han ido al llegar a la línea de juicio. 100 lo desactiva.
+TimeGroups_Hint_Color$Un tinte para las notas del grupo, en RRGGBB. Vacío para ninguno.
+TimeGroups_Hint_ColorHighlight$El color también tiñe el brillo de las notas resaltadas (highlight).
+TimeGroups_Hint_ColorNotes$El color tiñe las notas, rails incluidos. Desmárcalo y deja Highlight para teñir solo el brillo de las resaltadas.
+Timeline_Scroll$Alt para selección por recuadro, + Ctrl para selección múltiple.<br>Ctrl + rueda para hacer zoom en la TimeLine.<br>Arrastra la barra de tiempo de arriba para ajustar el tiempo.
+Timeline_Prev$Ir a la Motion anterior del mismo tipo que la seleccionada.
+Timeline_Next$Ir a la Motion siguiente del mismo tipo que la seleccionada.
+MediaPlayer_PlayControl$Si no hay ningún botón seleccionado, pulsa Espacio para reproducir/pausar.
+MediaPlayer_Progress$Ctrl + ←/→ mueve el progreso al beatline anterior/siguiente.<br>Alt + ←/→ mueve el progreso 0.001s<br>Shift + ←/→ mueve el progreso 0.01s
+ClickToCreate_Beatline$También puedes mantener Alt al pulsar.
+ClickToCreate_Angleline$También puedes mantener Ctrl al pulsar.
+Angleline_AddFavourite$Añadir a favoritos
+Angleline_UseFavourite$Mostrar estas líneas de ángulo
+Creator_CatchRail_Spins$Vueltas enteras alrededor del núcleo que dan las notas catch nuevas hasta llegar a la segunda nota seleccionada. En blanco o 0 van directas.
+Angleline_DeleteFavourite$Quitar de favoritos
+Angleline_EditFavourite$Editar este favorito
+Favourites_Add$Guardar la selección en favoritos
+Favourites_Use$Copiar
+Favourites_Rename$Cambiar nombre
+Favourites_Forget$Eliminar (doble clic)
+Favourites_Export$Guardar favoritos en un archivo
+Favourites_Import$Añadir favoritos desde un archivo
+ClickToCreate_Enable$Pulsa para crear un joint cuando tengas UNA nota larga seleccionada.
+Capturer_Export$Guardará el chart automáticamente y se ignorará cualquier entrada durante la exportación. Pulsa ESC para cancelar.
+TunerWindow_FullScreen$Pulsa ESC para volver.
+Create_Catch$Crear un rail de notas Catch entre las dos notas seleccionadas
+Create_ConvertSelectedToHoldNote$Convertir la selección en nota Hold: la primera en el tiempo será la cabeza y las demás los joints.
+TxtToLap$Para abrir un archivo .txt antiguo, crea un proyecto nuevo y selecciona tu .txt en la ruta del chart.
+MusicFormat$Solo se admiten .wav u .ogg
+DisableChartSpeed$Si lo desactivas, no podrás editar el Scroll Speed en el Inspector ni crear Scroll Speed.
+Header_Difficulty$Clic: cambia la dificultad (Whisper, Acoustic, Ultra, Master, la tuya u oculta).<br>Clic derecho: define tu propia dificultad, con su palabra y su color.
+Header_Level$Pulsa para escribir el nivel.
+Header_Pause$Reproducir / pausar
+UiTweak_NoteEffects$Destellos, ondas y chispas cuando una nota llega a la línea de juicio, como en el juego.
+UiTweak_ComboCounter$Muestra el combo junto a cada nota que llega a la línea de juicio.
+UiTweak_FlickArrows$Una flecha animada en las notas Flick In y Flick Out que señala hacia dónde deslizar, como en el juego.
+UiTweak_JudgeOrnaments$Un brillo que late con el beat y un anillo decorativo sobre la línea de juicio.
+UiTweak_Wave$La onda azul de la parte inferior, que sube y baja con el beat,<br>y las partículas que ascienden desde abajo, como en el juego.
+UiTweak_LanotaHeader$La cabecera del Tuner como la del juego. Pulsa la dificultad para cambiarla<br>y el número para escribir el nivel; se guardan en el proyecto.
+UiTweak_ShowScore$Con la Cabecera de Lanota, muestra el Score del juego en lugar del autor del chart.<br>Todas las notas cuentan como perfectas.
+UiTweak_TunerSkin$Ritmo y Física son los de siempre; el resto son las skins de la carpeta<br>StreamingAssets/TunerSkin (una carpeta por skin, con sus PNG).
+UiTweak_PerfectPurified$Cuando la reproducción pasa por el final de la última nota (Score 1.000.000),<br>aparece el "Perfect Purified" del juego con su sonido.
+UiTweak_ReadyIntro$Al reproducir desde el principio, la canción espera 4 segundos mientras aparece "Ready", como en el juego.<br>Pulsa reproducir otra vez para saltarlo.
+UiTweak_HdRails$Cuerpos de rail más nítidos: el pulsado más brillante y el sin pulsar con los bordes oscuros del juego.
+UiTweak_HdCore$El núcleo del afinador a 1024 px, más nítido. Una skin que traiga su propio núcleo lo sustituye.
+UiTweak_ProgressBar$Con la Cabecera de Lanota, una línea luminosa en el borde superior que muestra por dónde va la canción.
+UiTweak_CompactHighlight$El brillo de las notas resaltadas, ceñido a la nota como en el juego.
+UiTweak_CustomDifficulty$Tu propia dificultad para la Cabecera de Lanota: una palabra y un color en HEX, escrito o elegido en el selector. Se guarda en el proyecto.
+TopMenu_Language$Idioma / Language
+#TutorialDict
+FirstProject1$¡Bienvenido a Lanotalium!<br>¡Pulsa 'Archivo' para crear tu primer proyecto!
+FirstProject2$¡Pulsa 'Nuevo proyecto' para crear tu primer proyecto!
+FirstProject3$¡Elige la carpeta de tu proyecto!
+FirstProject4$Nota: el formato de música solo admite ogg o wav.
+FirstProject5$Como estás creando un proyecto, ¡deja la ruta del chart en blanco!<br>O selecciona una si ya tienes un chart.
+FirstProject6$Pulsa aquí para añadir hasta 3 imágenes de fondo.
+FirstProject7$¡Pulsa aquí para crearlo!

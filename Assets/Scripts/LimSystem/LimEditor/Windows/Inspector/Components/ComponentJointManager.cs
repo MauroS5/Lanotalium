@@ -85,7 +85,7 @@ public class ComponentJointManager : MonoBehaviour
     {
         if (!ComponentHoldNote.EnableValueChange) return;
         float DegreeTmp;
-        if (!float.TryParse(JointDegree.text, out DegreeTmp))
+        if (!LimNumber.TryParseFloat(JointDegree.text, out DegreeTmp))
         {
             JointDegreeImg.color = Invalid;
             return;
@@ -98,7 +98,7 @@ public class ComponentJointManager : MonoBehaviour
     {
         if (!ComponentHoldNote.EnableValueChange) return;
         float TimeTmp;
-        if (!float.TryParse(JointTime.text, out TimeTmp))
+        if (!LimNumber.TryParseFloat(JointTime.text, out TimeTmp))
         {
             JointTimeImg.color = Invalid;
             return;

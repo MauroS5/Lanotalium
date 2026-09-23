@@ -130,12 +130,17 @@ public class LimLanguageManager : MonoBehaviour
     }
     public void SetLanguage(string LanguageName)
     {
-        CurrentLanguage = LanguageName;
+        // Fall back to English rather than leaving the dictionaries null:
+        // a preferences file naming a language pack that no longer ships
+        // would otherwise make every later TextDict lookup throw.
         if (!LanguagePackages.ContainsKey(LanguageName))
         {
-            LimNotifyIcon.ShowMessage("Language Not Found !");
-            return;
+            LimNotifyIcon.ShowMessage("Language '" + LanguageName + "' not found, falling back to English.");
+            LanguageName = "English";
+            LimSystem.Preferences.LanguageName = LanguageName;
+            if (!LanguagePackages.ContainsKey(LanguageName)) return;
         }
+        CurrentLanguage = LanguageName;
         TextDict = LanguagePackages[LanguageName].TextDict;
         NotificationDict = LanguagePackages[LanguageName].NotificationDict;
         HintDict = LanguagePackages[LanguageName].HintDict;

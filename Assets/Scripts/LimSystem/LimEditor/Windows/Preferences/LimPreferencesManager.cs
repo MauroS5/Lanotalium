@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LimPreferencesManager : MonoBehaviour
+public partial class LimPreferencesManager : MonoBehaviour
 {
     public LimWindowManager BaseWindow;
     public LimLanguageManager LanguageManager;
@@ -27,6 +27,11 @@ public class LimPreferencesManager : MonoBehaviour
         AudioEffectThemeText.text = LimLanguageManager.TextDict["Preferences_AudioEffectTheme"];
         UnsafeText.text = LimLanguageManager.TextDict["Preferences_Unsafe"];
         WorkingBGMText.text = LimLanguageManager.TextDict["Preferences_WorkingBGM"];
+        // Built here rather than when the window is first opened: this runs
+        // while the editor is still starting up, which is when the theme
+        // decides what every control in the scene should look like.
+        BuildExtraRows();
+        SetExtraTexts();
     }
     public void OpenPreferencesMenu()
     {
@@ -37,6 +42,7 @@ public class LimPreferencesManager : MonoBehaviour
         AudioEffectToggle.isOn = LimSystem.Preferences.AudioEffect;
         AudioEffectThemeDropdown.value = (int)LimSystem.Preferences.AudioEffectTheme;
         UnsafeToggle.isOn = LimSystem.Preferences.Unsafe;
+        RestoreExtraRows();
         gameObject.SetActive(true);
     }
     public void OnLanguageDropdownChange()

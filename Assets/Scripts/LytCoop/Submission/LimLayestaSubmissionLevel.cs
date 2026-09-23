@@ -51,20 +51,24 @@ public class LimLayestaSubmissionLevel : MonoBehaviour
     }
     public void Upload()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Level.Upload"); return; }
         StartCoroutine(UploadCoroutine());
     }
     public void Download()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Level.Download"); return; }
         StartCoroutine(DownloadCoroutine());
     }
     public void Delete()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Level.Delete"); return; }
         MessageBoxManager.Instance.ShowMessage(LimLanguageManager.TextDict["Layesta_Submission_ConfirmDelete"], () => StartCoroutine(DeleteCoroutine()));
     }
 
     private bool interact = true, participantIgnore = false;
     public void UpdateInfo()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Level.UpdateInfo"); return; }
         if (!interact) return;
         StartCoroutine(UpdateInfoCoroutine());
     } 
@@ -75,6 +79,7 @@ public class LimLayestaSubmissionLevel : MonoBehaviour
     }
     IEnumerator UploadCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionLevel.UploadCoroutine"); yield break; }
         MessageBoxManager.Instance.ShowMessage(LimLanguageManager.TextDict["Layesta_Submission_Upload1"].Replace("<br>", "\n"));
         yield return null;
         string path = WindowsDialogUtility.OpenFileDialog(LimLanguageManager.TextDict["Layesta_Submission_Load"],
@@ -282,6 +287,7 @@ public class LimLayestaSubmissionLevel : MonoBehaviour
     }
     IEnumerator DownloadCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionLevel.DownloadCoroutine"); yield break; }
         string path = WindowsDialogUtility.SaveFileDialog(LimLanguageManager.TextDict["Layesta_Submission_Save"],
 #if UNITY_EDITOR
             "layesta"
@@ -334,6 +340,7 @@ public class LimLayestaSubmissionLevel : MonoBehaviour
     }
     IEnumerator DeleteCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionLevel.DeleteCoroutine"); yield break; }
         UnityWebRequest web = new UnityWebRequest
         {
             downloadHandler = new DownloadHandlerBuffer(),
@@ -376,6 +383,7 @@ public class LimLayestaSubmissionLevel : MonoBehaviour
     }
     IEnumerator UpdateInfoCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionLevel.UpdateInfoCoroutine"); yield break; }
         level.ShouldDisplay = ShouldDisplay.isOn;
         UnityWebRequest web = new UnityWebRequest
         {

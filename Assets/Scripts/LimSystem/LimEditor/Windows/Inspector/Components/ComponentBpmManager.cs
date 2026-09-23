@@ -16,6 +16,23 @@ public class ComponentBpmManager : MonoBehaviour
     public Text LabelText, TimingText, BpmText, BeatlineText, DensityText, FixSelectedText, FixAllText;
     public List<float> BeatlineTimes = new List<float>();
     public List<GameObject> Beatlines = new List<GameObject>();
+
+    /// <summary>
+    /// Which subdivision of its beat each beatline is, running alongside
+    /// BeatlineTimes. 0 is the beat itself, the one the metronome claps.
+    /// </summary>
+    public List<int> BeatlineSubdivisions = new List<int>();
+
+    // Light blue on the beat, green on the half, light orange on the
+    // quarters, light pink for anything finer.
+    private static readonly Color BeatlineOnBeatColor = new Color(0.45f, 0.75f, 1f);
+    private static readonly Color BeatlineHalfColor = new Color(0.45f, 0.9f, 0.55f);
+    private static readonly Color BeatlineQuarterColor = new Color(1f, 0.72f, 0.35f);
+    private static readonly Color BeatlineFinerColor = new Color(1f, 0.62f, 0.8f);
+    private Material BeatlineMaterial;
+
+    /// <summary>Set by the component's own slider; 1 is the look these lines always had.</summary>
+    public float LineOpacity = 1f;
     public InputField DensityInputField;
     public Image BeatlineImg, DensityImg;
     public float UnFoldHeight;
@@ -56,11 +73,62 @@ public class ComponentBpmManager : MonoBehaviour
     private bool isFolded = false, isBeatlineOpen = false;
     private float UiWidth, Density = 1;
 
+    private const float OpacityRowHeight = 35f;
+    private Slider OpacitySlider;
+    private Text OpacityLabel;
+
     private void Start()
     {
         ComponentRect.sizeDelta = new Vector2(0, ViewRect.sizeDelta.y - ViewRect.anchoredPosition.y);
+        CreateOpacityRow();
         RefreshUiWidth();
     }
+
+    /// <summary>
+    /// The beatlines' opacity slider, on a row of its own.
+    ///
+    /// It goes straight under the row of buttons, and the column headers and
+    /// the list of bpm entries below it are pushed down to make room: the
+    /// component lays its rows out at fixed heights, so a new one has to be
+    /// opened up rather than dropped on top.
+    /// </summary>
+    private void CreateOpacityRow()
+    {
+        if (DensityInputField == null) return;
+        RectTransform Parent = DensityInputField.GetComponent<RectTransform>().parent as RectTransform;
+        if (Parent == null) return;
+
+        // The buttons sit on the first row, so the second one is free once
+        // everything from there down has moved.
+        const float RowY = -35f;
+        for (int i = 0; i < Parent.childCount; ++i)
+        {
+            RectTransform Sibling = Parent.GetChild(i) as RectTransform;
+            if (Sibling == null) continue;
+            if (Sibling.anchoredPosition.y <= RowY + 0.5f)
+                Sibling.anchoredPosition = new Vector2(Sibling.anchoredPosition.x, Sibling.anchoredPosition.y - OpacityRowHeight);
+        }
+
+        Font Face = DensityInputField.textComponent != null ? DensityInputField.textComponent.font : null;
+        OpacityLabel = LimUiBuilder.CreateLabel(Parent, "OpacityLabel", Face, 14, new Color(0.85f, 0.85f, 0.85f), TextAnchor.MiddleLeft);
+        OpacityLabel.rectTransform.anchoredPosition = new Vector2(10, RowY);
+        OpacityLabel.rectTransform.sizeDelta = new Vector2(90, 30);
+
+        OpacitySlider = LimUiBuilder.CreateSlider(Parent, "Opacity", DensityInputField.GetComponent<Image>(), 0, 1, LineOpacity);
+        RectTransform SliderRect = OpacitySlider.GetComponent<RectTransform>();
+        SliderRect.anchorMin = new Vector2(0, 1);
+        SliderRect.anchorMax = new Vector2(1, 1);
+        SliderRect.pivot = new Vector2(0.5f, 1);
+        SliderRect.offsetMin = new Vector2(104, RowY - 23);
+        SliderRect.offsetMax = new Vector2(-10, RowY - 8);
+        OpacitySlider.onValueChanged.AddListener((float Value) => { LineOpacity = Value; });
+
+        UnFoldHeight += OpacityRowHeight;
+        if (!isFolded) ViewRect.sizeDelta = new Vector2(0, UnFoldHeight);
+        ComponentRect.sizeDelta = new Vector2(0, ViewRect.sizeDelta.y - ViewRect.anchoredPosition.y);
+        if (LimLanguageManager.TextDict != null) SetTexts();
+    }
+
     private void Update()
     {
         OnUiWidthChange();
@@ -95,6 +163,8 @@ public class ComponentBpmManager : MonoBehaviour
         DensityText.text = LimLanguageManager.TextDict["Component_Bpm_Density"];
         FixSelectedText.text = LimLanguageManager.TextDict["Component_Bpm_FixSelected"];
         FixAllText.text = LimLanguageManager.TextDict["Component_Bpm_FixAll"];
+        // Built in Start, so a language change arriving first finds it null.
+        if (OpacityLabel != null) OpacityLabel.text = LimLanguageManager.TextDict["Window_Creator_Opacity"];
     }
     public void Fold()
     {
@@ -122,7 +192,8 @@ public class ComponentBpmManager : MonoBehaviour
             Bpm.InstanceId = Bpm.ListGameObject.GetInstanceID();
             Height -= 30;
         }
-        ViewRect.sizeDelta = new Vector2(0, 70 - Height);
+        // The opacity row added at startup is part of the fixed height now.
+        ViewRect.sizeDelta = new Vector2(0, (OpacitySlider != null ? 70 + OpacityRowHeight : 70) - Height);
         UnFoldHeight = ViewRect.sizeDelta.y;
         ComponentRect.sizeDelta = new Vector2(0, ViewRect.sizeDelta.y - ViewRect.anchoredPosition.y);
         isFolded = false;
@@ -141,7 +212,7 @@ public class ComponentBpmManager : MonoBehaviour
     public void OnDensityChange()
     {
         float DensityTmp;
-        if (!float.TryParse(DensityInputField.text, out DensityTmp))
+        if (!LimNumber.TryParseFloat(DensityInputField.text, out DensityTmp))
         {
             DensityImg.color = InvalidColor;
             return;
@@ -163,13 +234,40 @@ public class ComponentBpmManager : MonoBehaviour
     public void ReCalculateBeatlineTimes()
     {
         BeatlineTimes.Clear();
+        BeatlineSubdivisions.Clear();
+        int Subdivisions = Mathf.Max(1, Mathf.RoundToInt(Density));
         for (int i = 0; i < TunerManager.BpmManager.Bpm.Count; ++i)
         {
             float BpmDeltaTime = (60 / TunerManager.BpmManager.Bpm[i].Bpm) / Density;
             float StartTime = (i == 0 ? 0 : TunerManager.BpmManager.Bpm[i].Time);
             float EndTime = (i == TunerManager.BpmManager.Bpm.Count - 1 ? TunerManager.MediaPlayerManager.Length : TunerManager.BpmManager.Bpm[i + 1].Time);
-            for (float t = StartTime; t <= EndTime; t += BpmDeltaTime) BeatlineTimes.Add(t);
+            // Counted from the start of each bpm section, so the line on the
+            // beat is always the one the metronome claps on.
+            int Step = 0;
+            for (float t = StartTime; t <= EndTime; t += BpmDeltaTime)
+            {
+                BeatlineTimes.Add(t);
+                BeatlineSubdivisions.Add(Step % Subdivisions);
+                ++Step;
+            }
         }
+    }
+
+    /// <summary>
+    /// Colour of the line sitting at one subdivision of a beat, so the eye
+    /// can read a dense grid: the beat itself, then the half, then the
+    /// quarters, then everything finer.
+    ///
+    /// With a density of 8 a beat reads blue, pink, orange, pink, green,
+    /// pink, orange, pink, and the next beat is blue again.
+    /// </summary>
+    private Color GetBeatlineColor(int Subdivision)
+    {
+        int Subdivisions = Mathf.Max(1, Mathf.RoundToInt(Density));
+        if (Subdivision == 0) return BeatlineOnBeatColor;
+        if (Subdivision * 2 == Subdivisions) return BeatlineHalfColor;
+        if (Subdivision * 4 == Subdivisions || Subdivision * 4 == Subdivisions * 3) return BeatlineQuarterColor;
+        return BeatlineFinerColor;
     }
     public int FindBeatlineTimesPositionByTime(float Time)
     {
@@ -232,6 +330,17 @@ public class ComponentBpmManager : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// The prefab's own material, the one every tint is derived from.
+    /// </summary>
+    private Material GetBeatlineMaterial()
+    {
+        if (BeatlineMaterial != null) return BeatlineMaterial;
+        if (BeatlinePrefab == null) return null;
+        LineRenderer Line = BeatlinePrefab.GetComponent<LineRenderer>();
+        if (Line != null) BeatlineMaterial = Line.sharedMaterial;
+        return BeatlineMaterial;
+    }
     private Vector3[] DrawCircle(float Radius)
     {
         List<Vector3> Points = new List<Vector3>();
@@ -256,7 +365,12 @@ public class ComponentBpmManager : MonoBehaviour
         GenerateCorrectQuantityBeatline(BeatlinesToDrawPercent.Count);
         for (int i = 0; i < BeatlinesToDrawPercent.Count; ++i)
         {
-            Beatlines[i].GetComponent<LineRenderer>().SetPositions(DrawCircle(BeatlinesToDrawPercent[i] / 10));
+            LineRenderer Line = Beatlines[i].GetComponent<LineRenderer>();
+            Line.SetPositions(DrawCircle(BeatlinesToDrawPercent[i] / 10));
+
+            int Index = StartIndex + i;
+            int Subdivision = Index < BeatlineSubdivisions.Count ? BeatlineSubdivisions[Index] : 0;
+            LimLineColor.Apply(Line, GetBeatlineMaterial(), GetBeatlineColor(Subdivision) * Mathf.Clamp01(LineOpacity));
         }
     }
 

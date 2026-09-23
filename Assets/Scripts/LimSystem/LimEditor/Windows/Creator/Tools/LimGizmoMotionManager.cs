@@ -324,7 +324,10 @@ public class LimGizmoMotionManager : MonoBehaviour
     {
         if (!_IsPointerinTunerWindow) return;
         Vector3 Old = TunerCamera.transform.position;
-        if (UseType10) TunerCamera.transform.position = new Vector3(Old.x, Old.y + Input.GetAxis("Mouse ScrollWheel") * (Input.GetKey(KeyCode.LeftControl) ? 50 : 5), Old.z);
+        // Shift and the wheel walk the beatlines, so the height of the camera
+        // is left alone while it is held. The rest of this tool still works.
+        bool WheelIsShifted = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        if (UseType10 && !WheelIsShifted) TunerCamera.transform.position = new Vector3(Old.x, Old.y + Input.GetAxis("Mouse ScrollWheel") * (Input.GetKey(KeyCode.LeftControl) ? 50 : 5), Old.z);
         if (Input.GetMouseButton(0) && (UseType8 || UseType11))
         {
             Vector3 MousePosition = Input.mousePosition;
@@ -362,37 +365,37 @@ public class LimGizmoMotionManager : MonoBehaviour
         float Rad = 0, Deg = 0, Hei = 0, Rot = 0;
         if (UseType8 || UseType11)
         {
-            if (!float.TryParse(RadiusInput.text, out Rad))
+            if (!LimNumber.TryParseFloat(RadiusInput.text, out Rad))
             { RadImg.color = InvalidColor; return; }
             else RadImg.color = ValidColor;
-            if (!float.TryParse(DegreeInput.text, out Deg))
+            if (!LimNumber.TryParseFloat(DegreeInput.text, out Deg))
             { DegImg.color = InvalidColor; return; }
             else DegImg.color = ValidColor;
         }
         else
         {
-            if (!float.TryParse(BeginRadiusText.text, out Rad)) return;
-            if (!float.TryParse(BeginDegreeText.text, out Deg)) return;
+            if (!LimNumber.TryParseFloat(BeginRadiusText.text, out Rad)) return;
+            if (!LimNumber.TryParseFloat(BeginDegreeText.text, out Deg)) return;
         }
         if (UseType10)
         {
-            if (!float.TryParse(HeightInput.text, out Hei))
+            if (!LimNumber.TryParseFloat(HeightInput.text, out Hei))
             { HeiImg.color = InvalidColor; return; }
             else HeiImg.color = ValidColor;
         }
         else
         {
-            if (!float.TryParse(BeginHeightText.text, out Hei)) return;
+            if (!LimNumber.TryParseFloat(BeginHeightText.text, out Hei)) return;
         }
         if (UseType13)
         {
-            if (!float.TryParse(RotationInput.text, out Rot))
+            if (!LimNumber.TryParseFloat(RotationInput.text, out Rot))
             { RotImg.color = InvalidColor; return; }
             else RotImg.color = ValidColor;
         }
         else
         {
-            if (!float.TryParse(BeginRotationText.text, out Rot)) return;
+            if (!LimNumber.TryParseFloat(BeginRotationText.text, out Rot)) return;
         }
         TunerCamera.transform.position = new Vector3(-Rad * Mathf.Cos(Deg * Mathf.Deg2Rad), Hei, Rad * Mathf.Sin(Deg * Mathf.Deg2Rad));
         TunerGameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Rot, 0));
@@ -439,12 +442,12 @@ public class LimGizmoMotionManager : MonoBehaviour
         if (UseType8)
         {
             float StartT, StartR, StartH, EndT, EndR, EndH, dT, dR, dH;
-            if (!float.TryParse(BeginRadiusText.text, out StartR)) return;
-            if (!float.TryParse(BeginDegreeText.text, out StartT)) return;
-            if (!float.TryParse(BeginHeightText.text, out StartH)) return;
-            if (!float.TryParse(RadiusInput.text, out EndR)) return;
-            if (!float.TryParse(DegreeInput.text, out EndT)) return;
-            if (!float.TryParse(HeightInput.text, out EndH)) return;
+            if (!LimNumber.TryParseFloat(BeginRadiusText.text, out StartR)) return;
+            if (!LimNumber.TryParseFloat(BeginDegreeText.text, out StartT)) return;
+            if (!LimNumber.TryParseFloat(BeginHeightText.text, out StartH)) return;
+            if (!LimNumber.TryParseFloat(RadiusInput.text, out EndR)) return;
+            if (!LimNumber.TryParseFloat(DegreeInput.text, out EndT)) return;
+            if (!LimNumber.TryParseFloat(HeightInput.text, out EndH)) return;
             dT = (EndT - StartT) / 199;
             dR = (EndR - StartR) / 199;
             dH = (EndH - StartH) / 199;
@@ -457,12 +460,12 @@ public class LimGizmoMotionManager : MonoBehaviour
         else if (UseType11 || UseType10)
         {
             float StartT, StartR, StartH, EndT, EndR, EndH;
-            if (!float.TryParse(BeginRadiusText.text, out StartR)) return;
-            if (!float.TryParse(BeginDegreeText.text, out StartT)) return;
-            if (!float.TryParse(BeginHeightText.text, out StartH)) return;
-            if (!float.TryParse(RadiusInput.text, out EndR)) return;
-            if (!float.TryParse(DegreeInput.text, out EndT)) return;
-            if (!float.TryParse(HeightInput.text, out EndH)) return;
+            if (!LimNumber.TryParseFloat(BeginRadiusText.text, out StartR)) return;
+            if (!LimNumber.TryParseFloat(BeginDegreeText.text, out StartT)) return;
+            if (!LimNumber.TryParseFloat(BeginHeightText.text, out StartH)) return;
+            if (!LimNumber.TryParseFloat(RadiusInput.text, out EndR)) return;
+            if (!LimNumber.TryParseFloat(DegreeInput.text, out EndT)) return;
+            if (!LimNumber.TryParseFloat(HeightInput.text, out EndH)) return;
             Vector3 Start = new Vector3(-StartR * Mathf.Cos(StartT * Mathf.Deg2Rad), -StartR * Mathf.Sin(StartT * Mathf.Deg2Rad), -StartH);
             Vector3 End = new Vector3(-EndR * Mathf.Cos(EndT * Mathf.Deg2Rad), -EndR * Mathf.Sin(EndT * Mathf.Deg2Rad), -EndH);
             MotionPreviewer.positionCount = 2;
@@ -473,7 +476,7 @@ public class LimGizmoMotionManager : MonoBehaviour
     public void OnDurationChange()
     {
         float Duration;
-        if (!float.TryParse(DurationInput.text, out Duration))
+        if (!LimNumber.TryParseFloat(DurationInput.text, out Duration))
         {
             DurationImg.color = InvalidColor;
             return;
@@ -488,7 +491,7 @@ public class LimGizmoMotionManager : MonoBehaviour
     {
         if (LimSystem.ChartContainer == null || !TunerManager.isInitialized) return;
         float TimeTmp;
-        if (!float.TryParse(TimeStartInput.text, out TimeTmp))
+        if (!LimNumber.TryParseFloat(TimeStartInput.text, out TimeTmp))
         {
             TimeStartImg.color = InvalidColor;
             return;
@@ -507,7 +510,7 @@ public class LimGizmoMotionManager : MonoBehaviour
     {
         if (LimSystem.ChartContainer == null || !TunerManager.isInitialized) return;
         float TimeTmp;
-        if (!float.TryParse(TimeEndInput.text, out TimeTmp))
+        if (!LimNumber.TryParseFloat(TimeEndInput.text, out TimeTmp))
         {
             TimeEndImg.color = InvalidColor;
             return;
@@ -574,8 +577,8 @@ public class LimGizmoMotionManager : MonoBehaviour
         if (UseType8)
         {
             float BeginRadius, BeginDegree;
-            if (!float.TryParse(BeginRadiusText.text, out BeginRadius)) return;
-            if (!float.TryParse(BeginDegreeText.text, out BeginDegree)) return;
+            if (!LimNumber.TryParseFloat(BeginRadiusText.text, out BeginRadius)) return;
+            if (!LimNumber.TryParseFloat(BeginDegreeText.text, out BeginDegree)) return;
             RadiusInput.text = (BeginRadius + Hor.ctp1).ToString();
             DegreeInput.text = (BeginDegree + Hor.ctp).ToString();
         }
@@ -606,7 +609,7 @@ public class LimGizmoMotionManager : MonoBehaviour
         TimeEndInput.text = (_TimeToCreate + Ver.Duration).ToString();
         EaseInput.text = Ver.cfmi.ToString();
         float BeginHeight;
-        if (!float.TryParse(BeginHeightText.text, out BeginHeight)) return;
+        if (!LimNumber.TryParseFloat(BeginHeightText.text, out BeginHeight)) return;
         HeightInput.text = (BeginHeight + Ver.ctp).ToString();
         gameObject.SetActive(true);
     }
@@ -630,7 +633,7 @@ public class LimGizmoMotionManager : MonoBehaviour
         TimeEndInput.text = (_TimeToCreate + Rot.Duration).ToString();
         EaseInput.text = Rot.cfmi.ToString();
         float BeginRotation;
-        if (!float.TryParse(BeginRotationText.text, out BeginRotation)) return;
+        if (!LimNumber.TryParseFloat(BeginRotationText.text, out BeginRotation)) return;
         RotationInput.text = (BeginRotation + Rot.ctp).ToString();
         gameObject.SetActive(true);
     }
@@ -639,35 +642,35 @@ public class LimGizmoMotionManager : MonoBehaviour
         int Ease;
         float Rad = 0, Deg = 0, Hei = 0, Rot = 0, Time = 0, Duration = 0;
         float StartT, StartR, StartH, StartRotation;
-        if (!float.TryParse(BeginRadiusText.text, out StartR)) return;
-        if (!float.TryParse(BeginDegreeText.text, out StartT)) return;
-        if (!float.TryParse(BeginHeightText.text, out StartH)) return;
-        if (!float.TryParse(BeginRotationText.text, out StartRotation)) return;
+        if (!LimNumber.TryParseFloat(BeginRadiusText.text, out StartR)) return;
+        if (!LimNumber.TryParseFloat(BeginDegreeText.text, out StartT)) return;
+        if (!LimNumber.TryParseFloat(BeginHeightText.text, out StartH)) return;
+        if (!LimNumber.TryParseFloat(BeginRotationText.text, out StartRotation)) return;
         if (UseType8 || UseType11)
         {
-            if (!float.TryParse(RadiusInput.text, out Rad))
+            if (!LimNumber.TryParseFloat(RadiusInput.text, out Rad))
             { RadImg.color = InvalidColor; return; }
             else RadImg.color = ValidColor;
-            if (!float.TryParse(DegreeInput.text, out Deg))
+            if (!LimNumber.TryParseFloat(DegreeInput.text, out Deg))
             { DegImg.color = InvalidColor; return; }
             else DegImg.color = ValidColor;
         }
         if (UseType10)
         {
-            if (!float.TryParse(HeightInput.text, out Hei))
+            if (!LimNumber.TryParseFloat(HeightInput.text, out Hei))
             { HeiImg.color = InvalidColor; return; }
             else HeiImg.color = ValidColor;
         }
         if (UseType13)
         {
-            if (!float.TryParse(RotationInput.text, out Rot))
+            if (!LimNumber.TryParseFloat(RotationInput.text, out Rot))
             { RotImg.color = InvalidColor; return; }
             else RotImg.color = ValidColor;
         }
-        if (!float.TryParse(TimeStartInput.text, out Time))
+        if (!LimNumber.TryParseFloat(TimeStartInput.text, out Time))
         { TimeStartImg.color = InvalidColor; return; }
         else TimeStartImg.color = ValidColor;
-        if (!float.TryParse(DurationInput.text, out Duration))
+        if (!LimNumber.TryParseFloat(DurationInput.text, out Duration))
         { DurationImg.color = InvalidColor; return; }
         else DurationImg.color = ValidColor;
         if (Duration < 0.0001f)

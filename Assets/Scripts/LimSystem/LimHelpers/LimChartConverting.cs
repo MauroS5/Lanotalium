@@ -28,13 +28,23 @@ public class LimChartConverting : MonoBehaviour
         ChartConvert.ArcaeaToLanota(ArcaeaAffPath);
         WindowsDialogUtility.OpenExplorer(ArcaeaAffPath.Replace(".aff", "_convert.txt"));
     }
+    /// <summary>
+    /// Retired with the Chart Convert menu, whose place the Analyzer took.
+    /// The scene still wires these to the menu entries until the top menu
+    /// rewires them at startup; should that ever fail again, they do nothing
+    /// rather than ask for a file and write a converted chart beside it.
+    /// </summary>
+    public static bool Retired = true;
+
     public void ConvertFromBms()
     {
+        if (Retired) return;
         if (convertingCoroutine != null) StopCoroutine(convertingCoroutine);
         convertingCoroutine = StartCoroutine(ConvertFromBmsCoroutine());
     }
     public void ConvertFromArcaea()
     {
+        if (Retired) return;
         if (convertingCoroutine != null) StopCoroutine(convertingCoroutine);
         convertingCoroutine = StartCoroutine(ConvertFromArcaeaCoroutine());
     }

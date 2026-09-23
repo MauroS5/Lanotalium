@@ -88,10 +88,12 @@ public class LimLayestaSubmissionManager : MonoBehaviour
     }
     public void Login()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Login"); return; }
         StartCoroutine(LoginCoroutine());
     }
     IEnumerator LoginCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionManager.LoginCoroutine"); yield break; }
         Message.text = LimLanguageManager.TextDict["Layesta_Submission_User_Wait"];
         UnityWebRequest web = new UnityWebRequest
         {
@@ -120,10 +122,12 @@ public class LimLayestaSubmissionManager : MonoBehaviour
     }
     public void Register()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Register"); return; }
         StartCoroutine(RegisterCoroutine());
     }
     IEnumerator RegisterCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionManager.RegisterCoroutine"); yield break; }
         Message.text = LimLanguageManager.TextDict["Layesta_Submission_User_Wait"];
         UnityWebRequest web = new UnityWebRequest
         {
@@ -152,10 +156,12 @@ public class LimLayestaSubmissionManager : MonoBehaviour
     }
     public void Refresh()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Refresh"); return; }
         StartCoroutine(RefreshCoroutine());
     }
     IEnumerator RefreshCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionManager.RefreshCoroutine"); yield break; }
         UnityWebRequest web = new UnityWebRequest
         {
             downloadHandler = new DownloadHandlerBuffer(),
@@ -197,10 +203,12 @@ public class LimLayestaSubmissionManager : MonoBehaviour
     }
     public void Add()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Layesta.Add"); return; }
         StartCoroutine(AddCoroutine());
     }
     IEnumerator AddCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimLayestaSubmissionManager.AddCoroutine"); yield break; }
         UnityWebRequest web = new UnityWebRequest
         {
             downloadHandler = new DownloadHandlerBuffer(),

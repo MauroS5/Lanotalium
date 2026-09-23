@@ -18,6 +18,7 @@ public class LimSubmitManager : MonoBehaviour
 
     private void Start()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submit.Start"); return; }
         Instance = this;
     }
     public void SetTexts()
@@ -59,6 +60,7 @@ public class LimSubmitManager : MonoBehaviour
     }
     public IEnumerator GetUserSubmissionsCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submit.GetUserSubmissions"); yield break; }
         if (Application.internetReachability == NetworkReachability.NotReachable) yield break;
         WWW Get = new WWW("https://lanotaliumapi.schwarzer.wang/chartzone/submit/enum/" + SystemInfo.deviceUniqueIdentifier);
         yield return Get;
@@ -97,6 +99,7 @@ public class LimSubmitManager : MonoBehaviour
     }
     public IEnumerator QueryNewSubmissionCoroutine()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submit.QueryNewSubmission"); yield break; }
         if (Application.internetReachability == NetworkReachability.NotReachable) yield break;
         WWW Get = new WWW("https://lanotaliumapi.schwarzer.wang/chartzone/submit/querynew/" + SystemInfo.deviceUniqueIdentifier);
         yield return Get;
@@ -122,6 +125,7 @@ public class LimSubmitManager : MonoBehaviour
     }
     public IEnumerator DeleteSubmissionCoroutine(int Id)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submit.DeleteSubmission"); yield break; }
         if (Application.internetReachability == NetworkReachability.NotReachable) yield break;
         WWW Get = new WWW("https://lanotaliumapi.schwarzer.wang/chartzone/submit/delete/" + SystemInfo.deviceUniqueIdentifier + "/" + Id);
         yield return Get;

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
-public class LimTunerManager : MonoBehaviour
+public partial class LimTunerManager : MonoBehaviour
 {
     public static LimTunerManager Instance
     {
@@ -33,6 +33,7 @@ public class LimTunerManager : MonoBehaviour
     {
         instance = this;
         Initialize();
+        SetUpVisualEffects();
     }
     public void Initialize()
     {
@@ -42,8 +43,11 @@ public class LimTunerManager : MonoBehaviour
         CameraManager.Initialize(ChartContainer.ChartData.LanotaCameraRot,
             ChartContainer.ChartData.LanotaCameraXZ,
             ChartContainer.ChartData.LanotaCameraY,
+            ChartContainer.ChartData.LanotaCameraTrs,
             ChartContainer.ChartData.LanotaDefault);
         ScrollManager.Initialize(ChartContainer.ChartData.LanotaScroll);
+        // Before the notes: the managers ask it which scroll each note moves by.
+        LimTimeGroups.Load(ChartContainer.ChartData.LanotaTimeGroups);
         TapNoteManager.Initialize(ChartContainer.ChartData.LanotaTapNote);
         HoldNoteManager.Initialize(ChartContainer.ChartData.LanotaHoldNote);
         MediaPlayerManager.Initialize(ChartContainer.ChartMusic, ChartContainer.ChartProperty);

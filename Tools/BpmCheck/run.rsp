@@ -1,0 +1,10 @@
+/nologo
+/optimize+
+/langversion:7.3
+/out:run.exe
+/nostdlib+
+/reference:"D:/Archivos de programa/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/mscorlib.dll"
+/reference:"D:/Archivos de programa/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/System.dll"
+/reference:"D:/Archivos de programa/Unity/Editor/Data/MonoBleedingEdge/lib/mono/4.7.1-api/System.Core.dll"
+Run.cs
+"../../Assets/Scripts/LimSystem/LimHelpers/LimBpmAnalysis.cs"

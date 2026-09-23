@@ -522,7 +522,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u8BED\u8A00 / Language"
+  m_Text: Language / Idioma
 --- !u!222 &1085297832
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -606,7 +606,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1274211777}
-        m_MethodName: IsChinese
+        m_MethodName: IsSpanish
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -759,7 +759,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7B80\u4F53\u4E2D\u6587"
+  m_Text: "Espa\u00F1ol"
 --- !u!222 &1466978184
 CanvasRenderer:
   m_ObjectHideFlags: 0

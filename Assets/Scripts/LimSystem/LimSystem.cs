@@ -44,6 +44,13 @@ namespace Lanotalium
             public float Bpm;
             public float Sizef;
             public joints joints;
+            /// <summary>
+            /// The note's time group. 0, the base group every note has always
+            /// been in, is left out of the file, so a chart with no groups is
+            /// written exactly as it was before groups existed.
+            /// </summary>
+            [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+            public int tg;
         }
         [System.Serializable]
         public class bpm
@@ -65,12 +72,46 @@ namespace Lanotalium
             public float timing;
         }
         [System.Serializable]
+        public class groupkey
+        {
+            public float t;
+            public float d;
+            public float v;
+            public int e;
+        }
+        [System.Serializable]
+        public class timegroup
+        {
+            public int id;
+            public string name;
+            public List<scroll> scroll;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public List<groupkey> opacity;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public List<groupkey> rotation;
+            /// <summary>Nullable, so a file written before these existed reads as "off" rather than as 0.</summary>
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public float? fadein;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public float? fadeout;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public string color;
+            /// <summary>Whether the colour reaches the notes and their highlight; left out (on) unless turned off.</summary>
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public bool? colornotes;
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public bool? colorhighlight;
+        }
+        [System.Serializable]
         public class LnmReadJson
         {
             public List<events> events;
             public float eos;
             public List<bpm> bpm;
             public List<scroll> scroll;
+            /// <summary>Left out of the file altogether while a chart has no groups.</summary>
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public List<timegroup> timegroups;
         }
     }
     namespace Chart
@@ -96,6 +137,8 @@ namespace Lanotalium
             public bool Combination;
             public float Bpm;
             public float Sizef;
+            /// <summary>The time group, 0 being the base group. See LimTimeGroups.</summary>
+            public int Group;
 
             public bool AudioEffectPlayed;
             public bool OnSelect;
@@ -119,6 +162,7 @@ namespace Lanotalium
                 HoldNote.Size = Size;
                 HoldNote.Time = Time;
                 HoldNote.Type = 5;
+                HoldNote.Group = Group;
                 return HoldNote;
             }
             public LanotaTapNote DeepCopy()
@@ -132,6 +176,7 @@ namespace Lanotalium
                 New.Critical = Critical;
                 New.Combination = Combination;
                 New.Bpm = Bpm;
+                New.Group = Group;
                 return New;
             }
         };
@@ -146,6 +191,8 @@ namespace Lanotalium
             public float Percent;
             public GameObject JointGameObject;
             public int InstanceId;
+            public SpriteRenderer Sprite;
+            public bool OnSelect;
 
             public LanotaJoints DeepCopy()
             {
@@ -170,6 +217,8 @@ namespace Lanotalium
             public float Bpm;
             public float FinalDegree;
             public float Sizef;
+            /// <summary>The time group, 0 being the base group. See LimTimeGroups.</summary>
+            public int Group;
 
             public bool StartEffectPlayed;
             public bool EndEffectPlayed;
@@ -201,6 +250,7 @@ namespace Lanotalium
                 TapNote.Size = Size;
                 TapNote.Time = Time;
                 TapNote.Type = Type;
+                TapNote.Group = Group;
                 return TapNote;
             }
             public LanotaHoldNote DeepCopy()
@@ -223,9 +273,54 @@ namespace Lanotalium
                 New.Critical = Critical;
                 New.Combination = Combination;
                 New.Bpm = Bpm;
+                New.Group = Group;
                 return New;
             }
         };
+        /// <summary>
+        /// A time group: notes that move by a scroll speed of their own
+        /// instead of the chart's. Ids are 1 and up and never reused within a
+        /// chart; 0 is the base group, which is the chart's own scroll speed
+        /// and is not stored as one of these.
+        /// </summary>
+        public class LanotaTimeGroup
+        {
+            public int Id;
+            public string Name = string.Empty;
+            public List<LanotaScroll> Scroll = new List<LanotaScroll>();
+            /// <summary>How opaque the group's notes are over time: each key a destination, 0 to 100, from 100.</summary>
+            public List<LanotaGroupKey> Opacity = new List<LanotaGroupKey>();
+            /// <summary>Degrees the group's notes are turned round the core, added up key by key like a rotation motion.</summary>
+            public List<LanotaGroupKey> Rotation = new List<LanotaGroupKey>();
+            /// <summary>
+            /// Fading by where a note is on its path, in per cent of the path, 0
+            /// at the core and 100 on the judge line: a note is fully shown only
+            /// once past FadeIn, and fades out from FadeOut to the line. 0 and 100
+            /// switch each off.
+            /// </summary>
+            public float FadeIn = 0;
+            public float FadeOut = 100;
+            /// <summary>A tint as RRGGBB, empty for none.</summary>
+            public string Color = string.Empty;
+            /// <summary>What the tint reaches: the notes themselves (rails and joints too), and the glow of highlighted ones.</summary>
+            public bool ColorNotes = true;
+            public bool ColorHighlight = true;
+
+            // Worked out once a frame by LimTimeGroups; never saved.
+            public float EvalAlpha = 1;
+            public float EvalRotation = 0;
+            public UnityEngine.Color EvalTint = UnityEngine.Color.white;
+            public bool EvalHasTint;
+        }
+        /// <summary>A key of a group's opacity or rotation: from Time, over Duration, to or by Value, eased by Ease.</summary>
+        public class LanotaGroupKey
+        {
+            public float Time;
+            public float Duration = 1;
+            public float Value;
+            public int Ease;
+            public GameObject ListGameObject;
+        }
         public class LanotaChangeBpm
         {
             public int Type;
@@ -306,6 +401,35 @@ namespace Lanotalium
                 return New;
             }
         };
+        /// <summary>
+        /// A transparency motion: how see-through the tuner's own ring is.
+        /// ctp is where it ends up, 0 to 100, 100 being the opaque ring the
+        /// editor has always drawn. Unlike height and rotation, which add
+        /// what they carry to whatever went before, this one is a
+        /// destination, the way a type 11 horizontal is: the ring fades from
+        /// wherever it was to the number written here.
+        ///
+        /// Type 14 is not a number Lanota itself reads, so a chart carrying
+        /// these still loads everywhere; the fade is the editor's own.
+        /// </summary>
+        public class LanotaCameraTrs : LanotaCameraBase
+        {
+            public LanotaCameraTrs DeepCopy()
+            {
+                LanotaCameraTrs New = new LanotaCameraTrs
+                {
+                    Type = Type,
+                    Time = Time,
+                    Duration = Duration,
+                    ctp = ctp,
+                    ctp1 = ctp1,
+                    ctp2 = ctp2,
+                    cfmi = cfmi,
+                    cflg = cflg
+                };
+                return New;
+            }
+        };
         public class LanotaScroll
         {
             public float Speed;
@@ -322,7 +446,9 @@ namespace Lanotalium
             public List<LanotaCameraXZ> LanotaCameraXZ;
             public List<LanotaCameraY> LanotaCameraY;
             public List<LanotaCameraRot> LanotaCameraRot;
+            public List<LanotaCameraTrs> LanotaCameraTrs;
             public List<LanotaScroll> LanotaScroll;
+            public List<LanotaTimeGroup> LanotaTimeGroups;
             public LanotaDefault LanotaDefault;
             public float SongLength;
             public ChartData(string Text)
@@ -331,12 +457,14 @@ namespace Lanotalium
                 MidJson = JsonConvert.DeserializeObject<Json.LnmReadJson>(Text);
                 if (MidJson == null) MidJson = JsonConvert.DeserializeObject<Json.LnmReadJson>("{\"events\":null,\"eos\":0,\"bpm\":null,\"scroll\":null}");
                 LanotaCameraRot = new List<LanotaCameraRot>();
+                LanotaCameraTrs = new List<LanotaCameraTrs>();
                 LanotaCameraXZ = new List<LanotaCameraXZ>();
                 LanotaCameraY = new List<LanotaCameraY>();
                 LanotaChangeBpm = new List<LanotaChangeBpm>();
                 LanotaDefault = new LanotaDefault();
                 LanotaHoldNote = new List<LanotaHoldNote>();
                 LanotaScroll = new List<LanotaScroll>();
+                LanotaTimeGroups = new List<LanotaTimeGroup>();
                 LanotaTapNote = new List<LanotaTapNote>();
                 //Events
                 if (MidJson.events != null)
@@ -356,6 +484,7 @@ namespace Lanotalium
                             TmpTap.Combination = MidJson.events[i].Combination;
                             TmpTap.Bpm = MidJson.events[i].Bpm;
                             TmpTap.Sizef = MidJson.events[i].Sizef;
+                            TmpTap.Group = MidJson.events[i].tg;
                             LanotaTapNote.Add(TmpTap);
                         }
                         else if (Type == 5)
@@ -392,6 +521,7 @@ namespace Lanotalium
                             TmpHold.Size = MidJson.events[i].Size;
                             TmpHold.Critical = MidJson.events[i].Critical;
                             TmpHold.Bpm = MidJson.events[i].Bpm;
+                            TmpHold.Group = MidJson.events[i].tg;
                             LanotaHoldNote.Add(TmpHold);
                         }
                         else if (Type == 8 || Type == 11)
@@ -439,6 +569,19 @@ namespace Lanotalium
                             TmpCam.cfmi = MidJson.events[i].cfmi;
                             TmpCam.cflg = MidJson.events[i].cflg;
                             LanotaCameraRot.Add(TmpCam);
+                        }
+                        else if (Type == 14)
+                        {
+                            LanotaCameraTrs TmpCam = new LanotaCameraTrs();
+                            TmpCam.Type = Type;
+                            TmpCam.Time = MidJson.events[i].Timing;
+                            TmpCam.Duration = MidJson.events[i].Duration;
+                            TmpCam.ctp = MidJson.events[i].ctp;
+                            TmpCam.ctp1 = MidJson.events[i].ctp1;
+                            TmpCam.ctp2 = MidJson.events[i].ctp2;
+                            TmpCam.cfmi = MidJson.events[i].cfmi;
+                            TmpCam.cflg = MidJson.events[i].cflg;
+                            LanotaCameraTrs.Add(TmpCam);
                         }
                     }
                 }
@@ -520,7 +663,65 @@ namespace Lanotalium
                     TmpScrollFirst.Time = -10;
                     LanotaScroll.Add(TmpScrollFirst);
                 }
+                LoadTimeGroups(MidJson.timegroups);
                 SongLength = MidJson.eos;
+            }
+            /// <summary>
+            /// Reads the groups, keeping each one's scroll speeds in time
+            /// order with the first at -10, the rule the chart's own list
+            /// follows. A note naming a group the file does not define goes
+            /// back to the base group rather than being left pointing nowhere.
+            /// </summary>
+            private static void ReadGroupKeys(List<Json.groupkey> Source, List<LanotaGroupKey> Into)
+            {
+                if (Source == null) return;
+                foreach (Json.groupkey Key in Source)
+                {
+                    if (Key == null) continue;
+                    Into.Add(new LanotaGroupKey { Time = Key.t, Duration = Key.d, Value = Key.v, Ease = Mathf.Clamp(Key.e, 0, 12) });
+                }
+                Into.Sort((LanotaGroupKey A, LanotaGroupKey B) => { return A.Time.CompareTo(B.Time); });
+            }
+            private static List<Json.groupkey> WriteGroupKeys(List<LanotaGroupKey> Keys)
+            {
+                if (Keys == null || Keys.Count == 0) return null;
+                List<Json.groupkey> Written = new List<Json.groupkey>();
+                foreach (LanotaGroupKey Key in Keys) Written.Add(new Json.groupkey { t = Key.Time, d = Key.Duration, v = Key.Value, e = Key.Ease });
+                return Written;
+            }
+            private void LoadTimeGroups(List<Json.timegroup> Groups)
+            {
+                HashSet<int> Known = new HashSet<int>();
+                if (Groups != null)
+                {
+                    foreach (Json.timegroup Source in Groups)
+                    {
+                        if (Source == null || Source.id <= 0 || Known.Contains(Source.id)) continue;
+                        LanotaTimeGroup Group = new LanotaTimeGroup { Id = Source.id, Name = Source.name ?? string.Empty };
+                        if (Source.scroll != null)
+                        {
+                            foreach (Json.scroll Speed in Source.scroll)
+                            {
+                                if (Speed == null) continue;
+                                Group.Scroll.Add(new LanotaScroll { Speed = Speed.speed, Time = Speed.timing });
+                            }
+                        }
+                        Group.Scroll.Sort((LanotaScroll A, LanotaScroll B) => { return A.Time.CompareTo(B.Time); });
+                        if (Group.Scroll.Count == 0) Group.Scroll.Add(new LanotaScroll { Speed = 1, Time = -10 });
+                        Group.Scroll[0].Time = -10;
+                        ReadGroupKeys(Source.opacity, Group.Opacity);
+                        ReadGroupKeys(Source.rotation, Group.Rotation);
+                        Group.FadeIn = Source.fadein.HasValue ? Mathf.Clamp(Source.fadein.Value, 0, 100) : 0;
+                        Group.FadeOut = Source.fadeout.HasValue ? Mathf.Clamp(Source.fadeout.Value, 0, 100) : 100;
+                        Group.Color = Source.color ?? string.Empty;
+                        Group.ColorNotes = Source.colornotes ?? true;
+                        Group.ColorHighlight = Source.colorhighlight ?? true;
+                        LanotaTimeGroups.Add(Group);
+                        Known.Add(Group.Id);
+                    }
+                }
+                foreach (LanotaTapNote Tap in LanotaTapNote) if (Tap.Group != 0 && !Known.Contains(Tap.Group)) Tap.Group = 0;
+                foreach (LanotaHoldNote Hold in LanotaHoldNote) if (Hold.Group != 0 && !Known.Contains(Hold.Group)) Hold.Group = 0;
             }
             public override string ToString()
             {
@@ -546,6 +747,7 @@ namespace Lanotalium
                     eventtmp.Combination = LanotaTapNote[i].Combination;
                     eventtmp.Bpm = LanotaTapNote[i].Bpm;
                     eventtmp.Sizef = LanotaTapNote[i].Sizef;
+                    eventtmp.tg = LanotaTapNote[i].Group;
                     OutputTmp.events.Add(eventtmp);
                 }
                 for (int i = 0; i < LanotaHoldNote.Count; ++i)
@@ -575,6 +777,7 @@ namespace Lanotalium
                     eventtmp.Size = LanotaHoldNote[i].Size;
                     eventtmp.Critical = LanotaHoldNote[i].Critical;
                     eventtmp.Bpm = LanotaHoldNote[i].Bpm;
+                    eventtmp.tg = LanotaHoldNote[i].Group;
                     OutputTmp.events.Add(eventtmp);
                 }
                 for (int i = 0; i < LanotaCameraXZ.Count; ++i)
@@ -616,6 +819,25 @@ namespace Lanotalium
                     eventtmp.cflg = LanotaCameraRot[i].cflg;
                     OutputTmp.events.Add(eventtmp);
                 }
+                // Written out like any other motion. A reader that does not
+                // know type 14 skips it, which is how this stays safe to put
+                // in a chart that has to load elsewhere as well.
+                if (LanotaCameraTrs != null)
+                {
+                    for (int i = 0; i < LanotaCameraTrs.Count; ++i)
+                    {
+                        Json.events eventtmp = new Json.events();
+                        eventtmp.Type = LanotaCameraTrs[i].Type;
+                        eventtmp.Timing = LanotaCameraTrs[i].Time;
+                        eventtmp.Duration = LanotaCameraTrs[i].Duration;
+                        eventtmp.ctp = LanotaCameraTrs[i].ctp;
+                        eventtmp.ctp1 = LanotaCameraTrs[i].ctp1;
+                        eventtmp.ctp2 = LanotaCameraTrs[i].ctp2;
+                        eventtmp.cfmi = LanotaCameraTrs[i].cfmi;
+                        eventtmp.cflg = LanotaCameraTrs[i].cflg;
+                        OutputTmp.events.Add(eventtmp);
+                    }
+                }
                 OutputTmp.events.Sort(delegate (Json.events a, Json.events b)
                 {
                     return a.Timing.CompareTo(b.Timing);
@@ -642,6 +864,24 @@ namespace Lanotalium
                     scrolltmp.speed = LanotaScroll[i].Speed;
                     scrolltmp.timing = LanotaScroll[i].Time;
                     OutputTmp.scroll.Add(scrolltmp);
+                }
+                if (LanotaTimeGroups != null && LanotaTimeGroups.Count != 0)
+                {
+                    OutputTmp.timegroups = new List<Json.timegroup>();
+                    foreach (LanotaTimeGroup Group in LanotaTimeGroups)
+                    {
+                        Json.timegroup Written = new Json.timegroup { id = Group.Id, name = Group.Name, scroll = new List<Json.scroll>() };
+                        foreach (LanotaScroll Speed in Group.Scroll) Written.scroll.Add(new Json.scroll { speed = Speed.Speed, timing = Speed.Time });
+                        Written.opacity = WriteGroupKeys(Group.Opacity);
+                        Written.rotation = WriteGroupKeys(Group.Rotation);
+                        // Only what differs from off is written.
+                        if (Group.FadeIn > 0) Written.fadein = Group.FadeIn;
+                        if (Group.FadeOut < 100) Written.fadeout = Group.FadeOut;
+                        if (!string.IsNullOrEmpty(Group.Color)) Written.color = Group.Color;
+                        if (!Group.ColorNotes) Written.colornotes = false;
+                        if (!Group.ColorHighlight) Written.colorhighlight = false;
+                        OutputTmp.timegroups.Add(Written);
+                    }
                 }
 
                 string JsonFile = JsonConvert.SerializeObject(OutputTmp);
@@ -750,6 +990,7 @@ namespace Lanotalium
             Horizontal,
             Vertical,
             Rotation,
+            Transparency,
             Multiple
         }
         public enum TimeValuePairMode
@@ -928,6 +1169,16 @@ namespace Lanotalium
         {
             public string Name;
             public string Designer;
+            /// <summary>
+            /// The Lanota style header's badge: 0 hidden, then Whisper,
+            /// Acoustic, Ultra, Master. A .lap written before it existed reads
+            /// as Master with no level.
+            /// </summary>
+            public int Difficulty = 4;
+            public string Level = string.Empty;
+            /// <summary>The project's own difficulty (Difficulty 5): its word, and its colour as RRGGBB.</summary>
+            public string DifficultyName = string.Empty;
+            public string DifficultyColor = string.Empty;
             private string chartPath;
             private string musicPath;
             private string bGA0Path;
@@ -1043,7 +1294,7 @@ namespace Lanotalium
     public class PreferencesContainer
     {
         public string LastOpenedChartFolder = string.Empty;
-        public string LanguageName = "简体中文";
+        public string LanguageName = "English";
         public string Designer = string.Empty;
         public float MusicPlayerPreciseOffset = 0;
         public float WaveformBlockerPosition = 0;
@@ -1051,7 +1302,61 @@ namespace Lanotalium
         public bool Autosave = true;
         public bool JudgeColor = true;
         public bool CloudAutosave = false;
-        public bool Waveform = false;
+        /// <summary>The waveform strip is on unless it is switched off in Preferences.</summary>
+        public bool Waveform = true;
+        /// <summary>How much of the song the waveform shows, in seconds; 0 is all of it.</summary>
+        public float WaveformVisibleSeconds = 0;
+        /// <summary>Whether the waveform shares the TimeLine's zoom instead of keeping its own.</summary>
+        public bool WaveformSyncZoom = false;
+        public Editor.WaveformColor WaveformColor = Editor.WaveformColor.Cyan;
+        /// <summary>How loud the song is played, 1 being the volume it was written at.</summary>
+        public float MusicVolume = 1;
+        public Editor.UiTheme Theme = Editor.UiTheme.Default;
+        /// <summary>The handle at a rail's end and the cut line the S key follows.</summary>
+        public bool RailNoteVisualGuide = true;
+        /// <summary>
+        /// How opaque the tuner's background layer is drawn, 0 to 100, as an
+        /// absolute: 0 is gone, 100 is solid. 60 is what the ring has always
+        /// been drawn at (0.603 in the scene), so an untouched setting changes
+        /// nothing. A new name rather than the TunerBackgroundOpacity an
+        /// earlier attempt saved, which meant a scale of that 0.603 instead:
+        /// a stale 100 left in a preferences file is ignored rather than read
+        /// as a solid background.
+        /// </summary>
+        public float TunerBackgroundAlpha = 60;
+        /// <summary>
+        /// Flowaria's UiTweak, built in: the effects of a note reaching the
+        /// judge line, the combo shown beside it, the judge line's glow and
+        /// ornament, and the Lanota style header.
+        /// </summary>
+        public bool NoteEffects = true;
+        public bool ComboCounter = true;
+        public bool JudgeLineOrnaments = true;
+        public bool LanotaHeader = true;
+        /// <summary>The sliding arrow on Flick In and Flick Out notes (Flowaria's AUTO_FlickArrow).</summary>
+        public bool FlickArrows = true;
+        /// <summary>The blue wave and the rising specks along the bottom of the tuner.</summary>
+        public bool BackgroundWave = true;
+        /// <summary>The Lanota header shows the score where the designer's name is.</summary>
+        public bool ShowScore = false;
+        /// <summary>The 1024 px core from Flowaria's AUTO_CorePatch, drawn at the core's size.</summary>
+        public bool HdCore = true;
+        /// <summary>Flowaria's sharper rail bodies, pressed and unpressed.</summary>
+        public bool HdRails = true;
+        /// <summary>"Perfect Purified" when playback passes the chart's last note.</summary>
+        public bool PerfectPurified = true;
+        /// <summary>
+        /// "Ready" for four seconds, the song held at its start, whenever
+        /// playback is started from the very beginning. Off by default: it
+        /// delays every such start.
+        /// </summary>
+        public bool ReadyIntro = false;
+        /// <summary>Highlighted notes' glow drawn close to the note, as in the game.</summary>
+        public bool CompactHighlight = true;
+        /// <summary>The Lanota header's light along its top edge, as long as the song played so far.</summary>
+        public bool ProgressBar = true;
+        /// <summary>A folder of StreamingAssets/TunerSkin drawn over Ritmo or Física; empty for none.</summary>
+        public string CustomTunerSkin = string.Empty;
         public bool AudioEffect = true;
         public bool Unsafe = false;
         public bool HideWhatsNew = false;
@@ -1060,6 +1365,10 @@ namespace Lanotalium
         public bool PlayWorkingBGM = false;
         public bool TimeLineBeatLine = true;
         public bool StretchBGA = true;
+        /// <summary>Angleline patterns kept for reuse, in the Creator's Angleline tool.</summary>
+        public List<string> AnglelineFavourites = new List<string>();
+        /// <summary>Saved groups of notes or motions, in the Creator's Favourite Groups tool.</summary>
+        public List<Editor.FavouritePattern> FavouritePatterns = new List<Editor.FavouritePattern>();
         public Editor.TunerSkin TunerSkin;
         public Tuner.AudioEffectTheme AudioEffectTheme = Tuner.AudioEffectTheme.Lanota;
     }
@@ -1149,6 +1458,10 @@ public class LimSystem : MonoBehaviour
         if (Directory.Exists(AppDataRoaming + "/Updator")) Directory.Delete(AppDataRoaming + "/Updator", true);
         if (!Directory.Exists(AppDataRoaming)) Directory.CreateDirectory(AppDataRoaming);
         RestorePreferences();
+        // After the preferences are back, so the chosen theme is known, and
+        // before the first frame ends, which is when the editor has finished
+        // building its windows.
+        LimThemeManager.Ensure();
         Application.logMessageReceived += ReceiveUnityLog;
         if (ProjectManager == null) return;
 #if UNITY_STANDALONE

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LimInspectorManager : MonoBehaviour
+public partial class LimInspectorManager : MonoBehaviour
 {
     public RectTransform ViewRect, ComponentRect;
     public LimWindowManager BaseWindow;
@@ -27,10 +27,12 @@ public class LimInspectorManager : MonoBehaviour
         BpmSwitcherText.text = LimLanguageManager.TextDict["Window_Inspector_Switcher_Bpm"];
         ScrollSpeedSwitcherText.text = LimLanguageManager.TextDict["Window_Inspector_Switcher_Scroll"];
         DefaultSwitcherText.text = LimLanguageManager.TextDict["Window_Inspector_Switcher_Default"];
+        SetTimeGroupsTexts();
     }
     private void Update()
     {
         DetectMouseScroll();
+        UpdateTimeGroupsUi();
     }
     private void OnEnable()
     {
@@ -95,6 +97,7 @@ public class LimInspectorManager : MonoBehaviour
             ComponentDefault.ComponentRect.anchoredPosition = new Vector2(0, Height);
             Height -= ComponentDefault.ComponentRect.sizeDelta.y;
         }
+        Height = ArrangeTimeGroupsUi(Height);
         ComponentRect.sizeDelta = new Vector2(0, -Height);
     }
     public void SwitchScrollSpeedList()
@@ -103,13 +106,14 @@ public class LimInspectorManager : MonoBehaviour
         if (TunerManager.ScrollManager.DisableChartSpeed) return;
         if (ComponentScrollSpeed.gameObject.activeInHierarchy)
         {
-            ScrollListSwitcherImg.color = UnpressedColor;
+            LimThemeManager.Paint(ScrollListSwitcherImg, UnpressedColor);
             ComponentScrollSpeed.gameObject.SetActive(false);
             ArrangeComponentsUi();
         }
         else
         {
-            ScrollListSwitcherImg.color = PressedColor;
+            CloseTimeGroups();
+            LimThemeManager.Paint(ScrollListSwitcherImg, PressedColor);
             ComponentScrollSpeed.gameObject.SetActive(true);
             ComponentScrollSpeed.InstantiateScrollSpeedList();
             ArrangeComponentsUi();
@@ -120,13 +124,14 @@ public class LimInspectorManager : MonoBehaviour
         if (LimSystem.ChartContainer == null) return;
         if (ComponentBpm.ComponentBpmView.activeInHierarchy)
         {
-            BpmListSwitcherImg.color = UnpressedColor;
+            LimThemeManager.Paint(BpmListSwitcherImg, UnpressedColor);
             ComponentBpm.ComponentBpmView.SetActive(false);
             ArrangeComponentsUi();
         }
         else
         {
-            BpmListSwitcherImg.color = PressedColor;
+            CloseTimeGroups();
+            LimThemeManager.Paint(BpmListSwitcherImg, PressedColor);
             ComponentBpm.ComponentBpmView.SetActive(true);
             ComponentBpm.InstantiateBpmList();
             ArrangeComponentsUi();
@@ -137,13 +142,14 @@ public class LimInspectorManager : MonoBehaviour
         if (LimSystem.ChartContainer == null) return;
         if (ComponentDefault.gameObject.activeInHierarchy)
         {
-            DefaultSwitcherImg.color = UnpressedColor;
+            LimThemeManager.Paint(DefaultSwitcherImg, UnpressedColor);
             ComponentDefault.gameObject.SetActive(false);
             ArrangeComponentsUi();
         }
         else
         {
-            DefaultSwitcherImg.color = PressedColor;
+            CloseTimeGroups();
+            LimThemeManager.Paint(DefaultSwitcherImg, PressedColor);
             ComponentDefault.gameObject.SetActive(true);
             ComponentDefault.LoadDefaultValues();
             ArrangeComponentsUi();

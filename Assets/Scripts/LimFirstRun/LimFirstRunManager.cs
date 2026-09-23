@@ -36,9 +36,9 @@ public class LimFirstRunManager : MonoBehaviour
             Preferences = new Lanotalium.PreferencesContainer();
         }
     }
-    public void IsChinese()
+    public void IsSpanish()
     {
-        Preferences.LanguageName = "简体中文";
+        Preferences.LanguageName = "Español";
         EnterLaunch();
     }
     public void IsOtherCountry()

@@ -40,7 +40,7 @@ public class LimChartBarManager : MonoBehaviour
         get
         {
             float _Size = 0;
-            float.TryParse(Data.Size.Replace(" MB", ""), out _Size);
+            LimNumber.TryParseFloat(Data.Size.Replace(" MB", ""), out _Size);
             return _Size;
         }
     }
@@ -69,6 +69,7 @@ public class LimChartBarManager : MonoBehaviour
     }
     IEnumerator GetBilibiliQrCode()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("ChartZone.GetBilibiliQrCode"); yield break; }
         WWW Qr = new WWW(LimChartZoneManager.QrCodeProvider + BilibiliUrl);
         yield return Qr;
         Sprite QrSprite = Sprite.Create(Qr.texture, new Rect(0, 0, Qr.texture.width, Qr.texture.height), new Vector2(0.5f, 0.5f));
@@ -81,12 +82,14 @@ public class LimChartBarManager : MonoBehaviour
     }
     public void StartDownloadChart()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("ChartZone.DownloadChart"); return; }
         if (!_IsInitialized) return;
         if (isDownloading) return;
         StartCoroutine(DownloadChart());
     }
     IEnumerator DownloadChart()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("ChartZone.DownloadChartCoroutine"); yield break; }
         isDownloading = true;
         WWW Download = new WWW(LimSystem.LanotaliumServer + "/lanotalium/chartzone/" + Data.ChartName + "/" + Data.ChartName + ".zip");
         DownloadSlider.value = 0;
@@ -157,6 +160,7 @@ public class LimChartBarManager : MonoBehaviour
     }
     IEnumerator GetRating()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimChartBarManager.GetRating"); yield break; }
         ObjectWrap<ChartDto> DataRef = new ObjectWrap<ChartDto>();
         yield return LimChartZoneWebApi.GetChartById(Data.Id, DataRef);
         Data = DataRef.Reference;
@@ -179,6 +183,7 @@ public class LimChartBarManager : MonoBehaviour
 
     public void StartShowQrCode()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("ChartZone.ShowQrCode"); return; }
         if (QrCodeAnimateCoroutine != null) StopCoroutine(QrCodeAnimateCoroutine);
         QrCodeAnimateCoroutine = StartCoroutine(ShowQrCode());
     }

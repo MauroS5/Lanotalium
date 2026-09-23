@@ -51,6 +51,20 @@ public class LimEditorManager : MonoBehaviour
         TimeLineWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.TimelineSize.ToVector2();
         CreatorWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.CreatorSize.ToVector2();
         SpectrumWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.SpectrumSize.ToVector2();
+        foreach (LimWindowManager Window in new[] { MusicPlayerWindow.BaseWindow, InspectorWindow.BaseWindow, TunerWindow.BaseWindow, TimeLineWindow.BaseWindow, CreatorWindow.BaseWindow, SpectrumWindow.BaseWindow })
+            KeepOnScreen(Window.WindowRectTransform);
+    }
+    /// <summary>
+    /// A window saved reaching past the right edge of the screen comes back
+    /// only as wide as the room left, since its right edge, where it is
+    /// resized, could not be reached to bring it back.
+    /// </summary>
+    private static void KeepOnScreen(RectTransform Window)
+    {
+        RectTransform Screen = Window.parent as RectTransform;
+        if (Screen == null) return;
+        float Room = Screen.rect.width - Window.anchoredPosition.x;
+        if (Room > 200 && Window.sizeDelta.x > Room) Window.sizeDelta = new Vector2(Room, Window.sizeDelta.y);
     }
     public void SaveEditorLayout()
     {
@@ -68,9 +82,38 @@ public class LimEditorManager : MonoBehaviour
         LimSystem.EditorLayout.SpectrumSize = new Lanotalium.Editor.Vector2Save(SpectrumWindow.BaseWindow.WindowRectTransform.sizeDelta);
     }
 
+    /// <summary>
+    /// Windows that stay closed on launch.
+    ///
+    /// Spectrum and Status are diagnostic panels rather than everyday
+    /// tools, so they no longer take up the workspace as soon as the
+    /// editor opens. Both are still reachable from the top menu, which
+    /// toggles these same objects.
+    ///
+    /// The Event window (the news / what's new popup) is closed too: its
+    /// contents are baked into the scene and were only ever refreshed from
+    /// the servers that no longer exist, so it greeted every launch with
+    /// the same text.
+    ///
+    /// Runs in Start, before the first frame is drawn, so nothing flashes.
+    /// </summary>
+    private void CloseWindowsOnStartup()
+    {
+        if (SpectrumWindow != null && SpectrumWindow.BaseWindow != null)
+            SpectrumWindow.BaseWindow.gameObject.SetActive(false);
+        if (StatusManager != null && StatusManager.BaseWindow != null)
+            StatusManager.BaseWindow.gameObject.SetActive(false);
+
+        // Addressed by path instead of a serialized field so that no scene
+        // rewiring is needed; the Event window hangs off this same object.
+        Transform EventWindow = transform.Find("CommonWindows/Event");
+        if (EventWindow != null) EventWindow.gameObject.SetActive(false);
+    }
+
     private void Start()
     {
         Instance = this;
+        CloseWindowsOnStartup();
         if (LimSystem.Preferences.HideWhatsNew) return;
     }
     public void SetTexts()

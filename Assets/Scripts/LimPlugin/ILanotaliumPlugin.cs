@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using EasyRequest;
 using UnityEngine;
@@ -7,70 +7,74 @@ namespace Lanotalium.Plugin
 {
     public enum Language
     {
-        简体中文,
-        English
+        // Value 0 used to be Simplified Chinese and has been removed.
+        // The slot is deliberately left empty instead of renumbering:
+        // plugins built against the old API baked English in as 1, so
+        // shifting the values would silently break every existing plugin.
+        English = 1,
+        Spanish = 2
     }
     public class LanotaliumContext
     {
         /// <summary>
-        /// 工程是否加载
+        /// Whether a project is currently loaded.
         /// </summary>
         public bool IsProjectLoaded { get; set; }
         /// <summary>
-        /// 当前语言
+        /// The language the editor is running in.
         /// </summary>
         public Language CurrentLanguage { get; set; }
         /// <summary>
-        /// 当前工程
+        /// The project currently open.
         /// </summary>
         public Project.LanotaliumProject CurrentProject { get; set; }
         /// <summary>
-        /// 游戏逻辑管理器
+        /// Game logic manager.
         /// </summary>
         public LimTunerManager TunerManager { get; set; }
         /// <summary>
-        /// 编辑器管理器
+        /// Editor manager.
         /// </summary>
         public LimEditorManager EditorManager { get; set; }
         /// <summary>
-        /// 谱面编辑管理器
+        /// Chart editing manager.
         /// </summary>
         public LimOperationManager OperationManager { get; set; }
         /// <summary>
-        /// 请求用户输入数据
+        /// Asks the user to input data.
         /// </summary>
         public EasyRequestManager UserRequest { get; set; }
         /// <summary>
-        ///  显示消息
+        /// Shows a message.
         /// </summary>
         public MessageBoxManager MessageBox { get; set; }
         /// <summary>
-        /// 执行是否成功
+        /// Whether execution succeeded.
         /// </summary>
         public bool Succeed { get; set; }
         /// <summary>
-        /// 执行结果
+        /// Execution result.
         /// </summary>
         public string ProcessResult { get; set; }
     }
     public interface ILanotaliumPlugin
     {
         /// <summary>
-        /// 本地化的插件名称
+        /// Localized plugin name.
         /// </summary>
-        /// <param name="language">语言种类</param>
-        /// <returns>插件名称</returns>
+        /// <param name="language">Language to return the name in</param>
+        /// <returns>Plugin name</returns>
         string Name(Language language);
         /// <summary>
-        /// 本地化的插件描述
+        /// Localized plugin description.
         /// </summary>
-        /// <param name="language">语言种类</param>
-        /// <returns>插件描述</returns>
+        /// <param name="language">Language to return the description in</param>
+        /// <returns>Plugin description</returns>
         string Description(Language language);
         /// <summary>
-        /// 执行插件功能（协程）
+        /// Runs the plugin (coroutine).
         /// </summary>
-        /// <param name="context">Lanotalium 上下文</param>
+        /// <param name="context">Lanotalium context</param>
         IEnumerator Process(LanotaliumContext context);
     }
 }

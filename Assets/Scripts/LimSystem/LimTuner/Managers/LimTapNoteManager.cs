@@ -22,6 +22,7 @@ public class LimTapNoteManager : MonoBehaviour
     void Update()
     {
         if (!isInitialized) return;
+        LimTimeGroups.EvaluateFrame(Tuner.ChartTime, Tuner.CameraManager);
         UpdateAllNoteShouldUpdate();
         UpdateAllNoteTransforms();
         UpdateAllNoteActive();
@@ -153,7 +154,16 @@ public class LimTapNoteManager : MonoBehaviour
     {
         foreach (Lanotalium.Chart.LanotaTapNote Note in TapNote)
         {
-            Note.shouldUpdate = true;
+            // A group moving by its own speed is on screen at moments the
+            // chart's speed knows nothing about, so it skips that culling
+            // and is placed every frame instead; being off screen then hides
+            // it the ordinary way.
+            if (LimTimeGroups.UsesOwnScroll(Note.Group))
+            {
+                Note.shouldUpdate = LimTimeGroups.IsVisible(Note.Group);
+                continue;
+            }
+            Note.shouldUpdate = LimTimeGroups.IsVisible(Note.Group);
             if (!LimScanTime.Instance.IsTapNoteinScanRange(Note))
             {
                 Note.shouldUpdate = false;
@@ -165,11 +175,13 @@ public class LimTapNoteManager : MonoBehaviour
         foreach (Lanotalium.Chart.LanotaTapNote Note in TapNote)
         {
             if (!Note.shouldUpdate) continue;
-            float Percent = CalculateMovePercent(Note.Time);
+            float Percent = LimTimeGroups.UsesOwnScroll(Note.Group)
+                ? LimTimeGroups.MovePercent(LimTimeGroups.ScrollFor(Note.Group, Tuner.ScrollManager), Tuner.ChartTime, Note.Time, Tuner.ChartPlaySpeed)
+                : CalculateMovePercent(Note.Time);
             Percent = CalculateEasedPercent(Percent);
             Note.Percent = Percent;
             if (Percent < 20) continue;
-            float RotatedDegree = Note.Degree + Tuner.CameraManager.CurrentRotation;
+            float RotatedDegree = Note.Degree + Tuner.CameraManager.CurrentRotation + LimTimeGroups.NoteRotation(Note.Group);
             Note.TapNoteGameObject.transform.rotation = Quaternion.Euler(new Vector3(90, RotatedDegree, 0));
             Note.TapNoteGameObject.transform.position = new Vector3(-Percent / 10 * Mathf.Sin(RotatedDegree * Mathf.Deg2Rad), 0, -Percent / 10 * Mathf.Cos(RotatedDegree * Mathf.Deg2Rad));
             Note.TapNoteGameObject.transform.localScale = new Vector3(Percent / 100, Percent / 100, 0);
@@ -207,15 +219,17 @@ public class LimTapNoteManager : MonoBehaviour
         foreach (Lanotalium.Chart.LanotaTapNote Note in TapNote)
         {
             if (!Note.shouldUpdate) continue;
-            if (Note.OnSelect) { if (Note.Sprite.color != OnSelectColor) Note.Sprite.color = OnSelectColor; }
-            else if (!Note.OnSelect) { if (Note.Sprite.color != NormalColor) Note.Sprite.color = NormalColor; }
-            if (LimSystem.Preferences.JudgeColor && !Note.OnSelect)
+            // The colour it should be is worked out first and written once,
+            // so a group's tint and opacity can go on top of it.
+            Color Wanted = Note.OnSelect ? OnSelectColor : NormalColor;
+            if (LimSystem.Preferences.JudgeColor && !Note.OnSelect && Tuner.ChartTime - Note.Time >= 0) Wanted = OnJudgeColor;
+            if (LimTimeGroups.HasEffects(Note.Group))
             {
-                if (Tuner.ChartTime - Note.Time >= 0)
-                {
-                    if (Note.Sprite.color != OnJudgeColor) Note.Sprite.color = OnJudgeColor;
-                }
+                Wanted = LimTimeGroups.Shade(Note.Group, Wanted, Note.Percent, Note.OnSelect, LimTimeGroups.IsHighlight(Note.Sprite));
+                LimTimeGroups.FadeExtras(Note.TapNoteGameObject, Note.Sprite, Note.Group, Note.OnSelect, Wanted.a);
             }
+            else LimTimeGroups.RestoreExtras(Note.TapNoteGameObject, Note.Sprite);
+            if (Note.Sprite.color != Wanted) Note.Sprite.color = Wanted;
         }
     }
     private void UpdateNoteAudioEffect()

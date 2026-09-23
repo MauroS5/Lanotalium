@@ -84,6 +84,7 @@ public class LimSubmissionManager : MonoBehaviour
     }
     public void UploadFile()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submission.UploadFile"); return; }
         if (_IsUploading) return;
         if (_SubmitDto == null) return;
         MessageBoxManager.Instance.ShowMessage(LimLanguageManager.TextDict["Submission_UploadRequest"], () =>
@@ -95,6 +96,7 @@ public class LimSubmissionManager : MonoBehaviour
     }
     IEnumerator UploadFileCoroutine(string FilePath)
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("LimSubmissionManager.UploadFileCoroutine"); yield break; }
         if (Application.internetReachability == NetworkReachability.NotReachable) yield break;
         _IsUploading = true;
         yield return UpdateChartInfo();
@@ -126,6 +128,7 @@ public class LimSubmissionManager : MonoBehaviour
     }
     public void DeleteChart()
     {
+        if (LimOfflineMode.Enabled) { LimOfflineMode.LogBlocked("Submission.DeleteChart"); return; }
         MessageBoxManager.Instance.ShowMessage(LimLanguageManager.TextDict["Submission_ConfirmDelete"], () => { StartCoroutine(LimSubmitManager.Instance.DeleteSubmissionCoroutine(_SubmitDto.SubmissionId)); });
     }
 }

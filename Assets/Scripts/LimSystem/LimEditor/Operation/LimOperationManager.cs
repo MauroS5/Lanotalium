@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Analytics;
 using UnityEngine.UI;
 using Schwarzer.Lanotalium.WebApi.Analytics;
 
-public class LimOperationManager : MonoBehaviour
+public partial class LimOperationManager : MonoBehaviour
 {
     public static LimOperationManager Instance { get; set; }
     public Camera TunerCamera;
@@ -38,11 +37,21 @@ public class LimOperationManager : MonoBehaviour
         _OperationSaver.Add(OpSave);
         _CurrentOperationSaverPosition = _OperationSaver.Count - 1;
     }
+    /// <summary>
+    /// Walks back one step. The list is never trimmed, so a session can be
+    /// undone to its beginning however long it has been.
+    ///
+    /// The step is taken whether or not it succeeded. An entry that throws
+    /// used to leave the position where it was, so every later press ran that
+    /// same broken entry again and undo looked as though it had stopped
+    /// after a certain number of actions; the chart is more likely to be put
+    /// right by carrying on past it than by being stuck in front of it.
+    /// </summary>
     public void Undo()
     {
         if (_OperationSaver.Count == 0) return;
         if (_CurrentOperationSaverPosition == -1) return;
-        _OperationSaver[_CurrentOperationSaverPosition].Reverse();
+        RunOperation(_OperationSaver[_CurrentOperationSaverPosition], false);
         _CurrentOperationSaverPosition = Mathf.Clamp(_CurrentOperationSaverPosition - 1, -1, _OperationSaver.Count - 1);
     }
     public void Redo()
@@ -50,21 +59,57 @@ public class LimOperationManager : MonoBehaviour
         if (_OperationSaver.Count == 0) return;
         if (_CurrentOperationSaverPosition == _OperationSaver.Count - 1) return;
         _CurrentOperationSaverPosition = Mathf.Clamp(_CurrentOperationSaverPosition + 1, -1, _OperationSaver.Count - 1);
-        _OperationSaver[_CurrentOperationSaverPosition].Forward();
+        RunOperation(_OperationSaver[_CurrentOperationSaverPosition], true);
+    }
+
+    private static void RunOperation(Lanotalium.Editor.OperationSave OpSave, bool Forward)
+    {
+        if (OpSave == null) return;
+        try
+        {
+            if (Forward) { if (OpSave.Forward != null) OpSave.Forward(); }
+            else { if (OpSave.Reverse != null) OpSave.Reverse(); }
+        }
+        catch (System.Exception Thrown)
+        {
+            // Reported rather than swallowed: it is a bug in whatever wrote
+            // the entry, and the log is where it will be found.
+            Debug.LogException(Thrown);
+        }
     }
 
     private void Update()
     {
-        if (LimSystem.ChartContainer == null) return;
+        if (LimSystem.ChartContainer == null) { HideRailGuides(); return; }
+        // Before the tuner's own Ctrl-drag and before the note drag: taking
+        // hold of the end of a rail is also Ctrl and the left button, and the
+        // other two stand aside once it has started.
+        DetectRailEndDrag();
+        DetectTunerPan();
+        DetectClipboard();
+        DetectNoteNudge();
+        DetectNoteKeys();
+        DetectBeatlineWheel();
+        DetectNoteDrag();
         DetectNoteSelection();
         DetectDeleteRequest();
         DetectUndoRedo();
+        DetectSelectionTools();
+        DetectFavouriteShortcut();
+        // The rail under the pointer is worked out once and then used by the
+        // guide line, by J and by S, so all three agree about the same spot.
+        UpdateRailPointer();
+        DetectRailJointInsert();
+        DetectRailSplit();
+        UpdateRailGuides();
     }
 
     public void DetectNoteSelection()
     {
         if (Input.GetMouseButtonUp(0))
         {
+            if (ConsumeDragClick()) return;
+            if (_PasteActive) return;
             Vector3 MousePosition = LimMousePosition.MousePosition;
             Vector3 TunerPosition = new Vector3();
             TunerPosition.x = MousePosition.x - TunerWindowRect.anchoredPosition.x;
@@ -78,7 +123,15 @@ public class LimOperationManager : MonoBehaviour
                 if (TryFindTapNote == -1)
                 {
                     int TryFindHoldNote = FindHoldNoteIndexByInstanceID(InstanceId);
-                    if (TryFindHoldNote == -1) return;
+                    if (TryFindHoldNote == -1)
+                    {
+                        // A joint of a rail is picked up the same way a note
+                        // is, Ctrl included.
+                        RailJoint Joint = FindJointByInstanceId(InstanceId);
+                        if (Joint == null) return;
+                        SelectJoint(Joint.Hold, Joint.Joint);
+                        return;
+                    }
                     else
                     {
                         SelectHoldNote(TunerManager.HoldNoteManager.HoldNote[TryFindHoldNote]);
@@ -126,6 +179,7 @@ public class LimOperationManager : MonoBehaviour
     {
         foreach (Lanotalium.Chart.LanotaTapNote Tap in SelectedTapNote) Tap.OnSelect = false;
         foreach (Lanotalium.Chart.LanotaHoldNote Hold in SelectedHoldNote) Hold.OnSelect = false;
+        DeSelectAllJoints();
         SelectedTapNote.Clear();
         SelectedHoldNote.Clear();
         InspectorManager.OnSelectChange();
@@ -134,6 +188,7 @@ public class LimOperationManager : MonoBehaviour
     }
     public void DeleteAllSelected()
     {
+        DeleteSelectedJoints();
         foreach (Lanotalium.Chart.LanotaTapNote Tap in SelectedTapNote) DeleteTapNote(Tap);
         foreach (Lanotalium.Chart.LanotaHoldNote Hold in SelectedHoldNote) DeleteHoldNote(Hold);
         SelectedTapNote.Clear();
@@ -157,6 +212,8 @@ public class LimOperationManager : MonoBehaviour
                     TunerManager.CameraManager.Vertical.Remove(Base as Lanotalium.Chart.LanotaCameraY); break;
                 case 13:
                     TunerManager.CameraManager.Rotation.Remove(Base as Lanotalium.Chart.LanotaCameraRot); break;
+                case 14:
+                    if (TunerManager.CameraManager.Transparency != null) TunerManager.CameraManager.Transparency.Remove(Base as Lanotalium.Chart.LanotaCameraTrs); break;
             }
         }
         SelectedMotions.Clear();
@@ -317,15 +374,21 @@ public class LimOperationManager : MonoBehaviour
         OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetTapNoteType(TapNoteData, OriginType, false); InspectorManager.OnSelectChange(); });
         AddToOperationSaver(OpSave);
     }
-    public void SetTapNoteDegree(Lanotalium.Chart.LanotaTapNote TapNoteData, float Degree, bool isAbsolute, bool SaveOperation = true)
+    /// <summary>
+    /// Normalize false keeps the number exactly as it was handed over, which
+    /// is what a degree typed into the inspector wants: the editor's own
+    /// moves are wrapped into 0-360 so the accumulated camera rotation cannot
+    /// leak into a note, but somebody who writes -3600 on purpose means it.
+    /// </summary>
+    public void SetTapNoteDegree(Lanotalium.Chart.LanotaTapNote TapNoteData, float Degree, bool isAbsolute, bool SaveOperation = true, bool Normalize = true)
     {
         float OriginDegree = TapNoteData.Degree;
-        if (isAbsolute) TapNoteData.Degree = Degree - TunerManager.CameraManager.CalculateCameraRotation(TapNoteData.Time);
-        else TapNoteData.Degree = Degree;
+        float Written = isAbsolute ? Degree - TunerManager.CameraManager.CalculateCameraRotation(TapNoteData.Time) : Degree;
+        TapNoteData.Degree = Normalize ? LimMathUtil.NormalizeDegree(Written) : Written;
         if (!SaveOperation) return;
         Lanotalium.Editor.OperationSave OpSave = new Lanotalium.Editor.OperationSave();
-        OpSave.Forward = new Lanotalium.Editor.OperationForward(() => { SetTapNoteDegree(TapNoteData, Degree, isAbsolute, false); });
-        OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetTapNoteDegree(TapNoteData, OriginDegree, false, false); InspectorManager.OnSelectChange(); });
+        OpSave.Forward = new Lanotalium.Editor.OperationForward(() => { SetTapNoteDegree(TapNoteData, Degree, isAbsolute, false, Normalize); });
+        OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetTapNoteDegree(TapNoteData, OriginDegree, false, false, false); InspectorManager.OnSelectChange(); });
         AddToOperationSaver(OpSave);
     }
     public void SetTapNoteTime(Lanotalium.Chart.LanotaTapNote TapNoteData, float Time, bool SaveOperation = true)
@@ -515,15 +578,16 @@ public class LimOperationManager : MonoBehaviour
         OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetHoldNoteTime(HoldNoteData, OriginTime, false); InspectorManager.OnSelectChange(); });
         AddToOperationSaver(OpSave);
     }
-    public void SetHoldNoteDegree(Lanotalium.Chart.LanotaHoldNote HoldNoteData, float Degree, bool isAbsolute, bool SaveOperation = true)
+    /// <summary>See SetTapNoteDegree for what Normalize is for.</summary>
+    public void SetHoldNoteDegree(Lanotalium.Chart.LanotaHoldNote HoldNoteData, float Degree, bool isAbsolute, bool SaveOperation = true, bool Normalize = true)
     {
         float OriginDegree = HoldNoteData.Degree;
-        if (isAbsolute) HoldNoteData.Degree = Degree - TunerManager.CameraManager.CalculateCameraRotation(HoldNoteData.Time);
-        else HoldNoteData.Degree = Degree;
+        float Written = isAbsolute ? Degree - TunerManager.CameraManager.CalculateCameraRotation(HoldNoteData.Time) : Degree;
+        HoldNoteData.Degree = Normalize ? LimMathUtil.NormalizeDegree(Written) : Written;
         if (!SaveOperation) return;
         Lanotalium.Editor.OperationSave OpSave = new Lanotalium.Editor.OperationSave();
-        OpSave.Forward = new Lanotalium.Editor.OperationForward(() => { SetHoldNoteDegree(HoldNoteData, Degree, isAbsolute, false); });
-        OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetHoldNoteDegree(HoldNoteData, OriginDegree, false, false); InspectorManager.OnSelectChange(); });
+        OpSave.Forward = new Lanotalium.Editor.OperationForward(() => { SetHoldNoteDegree(HoldNoteData, Degree, isAbsolute, false, Normalize); });
+        OpSave.Reverse = new Lanotalium.Editor.OperationReverse(() => { SetHoldNoteDegree(HoldNoteData, OriginDegree, false, false, false); InspectorManager.OnSelectChange(); });
         AddToOperationSaver(OpSave);
     }
     public void SetJointNoteDegree(Lanotalium.Chart.LanotaHoldNote HoldNoteData, Lanotalium.Chart.LanotaJoints JointNoteData, float Degree, bool isAbsolute, bool isChained, bool SaveOperation = true)
@@ -667,7 +731,9 @@ public class LimOperationManager : MonoBehaviour
     public void DeleteHoldNote(Lanotalium.Chart.LanotaHoldNote HoldNoteData, bool SaveOperation = true)
     {
         Destroy(HoldNoteData.HoldNoteGameObject);
-        if (HoldNoteData.Joints != null) foreach (Lanotalium.Chart.LanotaJoints Joint in HoldNoteData.Joints) Destroy(Joint.JointGameObject);
+        // A joint that is gone must not stay picked up, or the arrow keys
+        // would go on writing to a rail that no longer has it.
+        if (HoldNoteData.Joints != null) foreach (Lanotalium.Chart.LanotaJoints Joint in HoldNoteData.Joints) { DeSelectJoint(Joint); Destroy(Joint.JointGameObject); }
         TunerManager.HoldNoteManager.HoldNote.Remove(HoldNoteData);
         if (!SaveOperation) return;
         Lanotalium.Editor.OperationSave OpSave = new Lanotalium.Editor.OperationSave();
@@ -678,6 +744,7 @@ public class LimOperationManager : MonoBehaviour
     public void DeleteJointNote(Lanotalium.Chart.LanotaHoldNote HoldNoteData, Lanotalium.Chart.LanotaJoints JointNoteData, bool SaveOperation = true)
     {
         if (HoldNoteData.Joints == null) throw new Lanotalium.Exceptions.NullJointsReferenceException();
+        DeSelectJoint(JointNoteData);
         Destroy(JointNoteData.JointGameObject);
         HoldNoteData.Joints.Remove(JointNoteData);
         HoldNoteData.Jcount = HoldNoteData.Joints.Count;
@@ -759,8 +826,15 @@ public class LimOperationManager : MonoBehaviour
     }
     public void OnTimeLineClick(int InstanceId)
     {
+        // The click that drops a motion paste is not a click on a bar.
+        if (TimeLineManager != null && TimeLineManager.IsMotionPasting) return;
         Lanotalium.Chart.LanotaCameraBase MotionBase = FindMotionBase(InstanceId);
         if (MotionBase == null) return;
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            if (SelectMotionRangeTo(MotionBase)) return;
+        }
+        _LastClickedMotion = MotionBase;
         if (!Input.GetKey(KeyCode.LeftControl))
         {
             if (SelectedMotions.Count > 1) DeSelectAllMotions();
@@ -791,8 +865,13 @@ public class LimOperationManager : MonoBehaviour
             else
             {
                 Index = FindRotationIndexByInstanceId(InstanceId);
-                if (Index == -1) return;
-                else InspectorManager.ComponentMotion.SetMode(Lanotalium.Editor.ComponentMotionMode.Rotation, Index);
+                if (Index != -1) InspectorManager.ComponentMotion.SetMode(Lanotalium.Editor.ComponentMotionMode.Rotation, Index);
+                else
+                {
+                    Index = FindTransparencyIndexByInstanceId(InstanceId);
+                    if (Index == -1) return;
+                    else InspectorManager.ComponentMotion.SetMode(Lanotalium.Editor.ComponentMotionMode.Transparency, Index);
+                }
             }
         }
         InspectorManager.ArrangeComponentsUi();
@@ -810,6 +889,7 @@ public class LimOperationManager : MonoBehaviour
             case 10: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp10; break;
             case 11: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp11; break;
             case 13: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp13; break;
+            case 14: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp14; break;
         }
         SelectedMotions.Remove(Base);
     }
@@ -823,6 +903,7 @@ public class LimOperationManager : MonoBehaviour
                 case 10: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp10; break;
                 case 11: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp11; break;
                 case 13: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp13; break;
+                case 14: Base.TimeLineGameObject.GetComponent<Image>().color = TimeLineManager.Tp14; break;
             }
         }
         SelectedMotions.Clear();
@@ -838,8 +919,10 @@ public class LimOperationManager : MonoBehaviour
             else
             {
                 Index = FindRotationIndexByInstanceId(InstanceId);
+                if (Index != -1) return TunerManager.CameraManager.Rotation[Index];
+                Index = FindTransparencyIndexByInstanceId(InstanceId);
                 if (Index == -1) return null;
-                else return TunerManager.CameraManager.Rotation[Index];
+                else return TunerManager.CameraManager.Transparency[Index];
             }
         }
     }
@@ -1450,8 +1533,12 @@ public class LimOperationManager : MonoBehaviour
     public void DeleteScroll(Lanotalium.Chart.LanotaScroll ScrollData, bool SaveOperation = true)
     {
         Destroy(ScrollData.ListGameObject);
-        TunerManager.ScrollManager.Scroll.Remove(ScrollData);
-        InspectorManager.ComponentScrollSpeed.InstantiateScrollSpeedList();
+        // The chart's own list or a time group's: see ScrollListOf.
+        List<Lanotalium.Chart.LanotaScroll> Owner = ScrollListOf(ScrollData);
+        bool IsChartList = Owner == TunerManager.ScrollManager.Scroll;
+        Owner.Remove(ScrollData);
+        if (IsChartList) InspectorManager.ComponentScrollSpeed.InstantiateScrollSpeedList();
+        LimTimeGroups.RaiseChanged();
     }
     public bool CheckNewScrollTimeExisted(Lanotalium.Chart.LanotaScroll ScrollData)
     {
@@ -1466,11 +1553,14 @@ public class LimOperationManager : MonoBehaviour
     {
         if (LimSystem.Preferences.Unsafe) return true;
         if (Time < 0) return false;
-        int Index = FindScrollIndexByInstanceId(ScrollData.InstanceId);
-        if (TunerManager.ScrollManager.Scroll[Index - 1].Time >= Time) return false;
-        if (Index != TunerManager.ScrollManager.Scroll.Count - 1)
+        // Checked against its neighbours in whichever list it belongs to.
+        List<Lanotalium.Chart.LanotaScroll> Owner = ScrollListOf(ScrollData);
+        int Index = Owner.IndexOf(ScrollData);
+        if (Index <= 0) return false;
+        if (Owner[Index - 1].Time >= Time) return false;
+        if (Index != Owner.Count - 1)
         {
-            if (Time >= TunerManager.ScrollManager.Scroll[Index + 1].Time) return false;
+            if (Time >= Owner[Index + 1].Time) return false;
         }
         return true;
     }

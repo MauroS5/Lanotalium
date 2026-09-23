@@ -43,6 +43,14 @@ public class LimBoxSelectionManager : MonoBehaviour
         if (!TunerManager.isInitialized) return;
         if (!Enable) return;
         if (GizmoMotionManager.IsOpen) return;
+        // Grabbing a note or placing a paste must never start a rectangle: that would wipe
+        // that would wipe the selection or fight for the same click.
+        if (LimOperationManager.Instance != null && LimOperationManager.Instance.IsNoteGestureInProgress)
+        {
+            BoxSelectionPanel.sizeDelta = new Vector2();
+            _ShouldDraw = false;
+            return;
+        }
         DrawBoxSelectionArea();
     }
     private void DrawBoxSelectionArea()

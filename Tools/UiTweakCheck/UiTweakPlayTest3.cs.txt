@@ -1,0 +1,198 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using Newtonsoft.Json;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.UI;
+
+[InitializeOnLoad]
+public static class UiTweakPlayTest
+{
+    // Where the copied project goes and the report and screenshots are written.
+    static readonly string Dir = Path.Combine(Path.GetTempPath(), "UiTweakCheck") + Path.DirectorySeparatorChar;
+    static readonly string Lap = Dir + @"testproj\Death Moon.lap";
+    static readonly string Shots = Dir + @"render3\";
+    static StringBuilder Log = new StringBuilder();
+    static IEnumerator Script;
+    static double Started;
+    static double WaitUntil;
+
+    static UiTweakPlayTest()
+    {
+        if (SessionState.GetBool("UiTweakTest", false)) EditorApplication.update += Tick;
+    }
+
+    public static void Run()
+    {
+        SessionState.SetBool("UiTweakTest", true);
+        Directory.CreateDirectory(Shots);
+        foreach (string F in Directory.GetFiles(Shots)) File.Delete(F);
+        File.WriteAllText(Dir + "playtest3.txt", "started\n");
+        EditorSceneManager.OpenScene("Assets/_Scenes/LimTuner.unity", OpenSceneMode.Single);
+        EditorApplication.update += Tick;
+        EditorApplication.isPlaying = true;
+    }
+
+    static void Tick()
+    {
+        if (!EditorApplication.isPlaying) return;
+        if (Script == null)
+        {
+            Started = EditorApplication.timeSinceStartup;
+            Application.logMessageReceived += (Msg, Stack, Type) =>
+            {
+                if (Type == LogType.Exception || Type == LogType.Error || (Type == LogType.Warning && Msg.Contains("UiTweak")))
+                    Log.AppendLine("[" + Type + "] " + Msg + "\n" + Stack);
+            };
+            Script = Steps();
+        }
+        if (EditorApplication.timeSinceStartup - Started > 300) { Note("TIMEOUT"); Finish(); return; }
+        if (EditorApplication.timeSinceStartup < WaitUntil) return;
+        try
+        {
+            if (!Script.MoveNext()) Finish();
+        }
+        catch (Exception E) { Note("SCRIPT EXCEPTION " + E); Finish(); }
+    }
+
+    static void Finish()
+    {
+        File.WriteAllText(Dir + "playtest3.txt", Log.ToString());
+        SessionState.SetBool("UiTweakTest", false);
+        EditorApplication.update -= Tick;
+        EditorApplication.Exit(0);
+    }
+
+    static void Note(string S)
+    {
+        Log.AppendLine(S);
+        File.WriteAllText(Dir + "playtest3.txt", Log.ToString());
+    }
+
+    static object Wait(double Seconds) { WaitUntil = EditorApplication.timeSinceStartup + Seconds; return null; }
+
+    static LimTunerManager T { get { return LimTunerManager.Instance; } }
+
+    static IEnumerator Steps()
+    {
+        yield return Wait(2);
+        LimProjectManager Pm = UnityEngine.Object.FindObjectOfType<LimProjectManager>();
+        LimProjectManager.CurrentProject = JsonConvert.DeserializeObject<Lanotalium.Project.LanotaliumProject>(File.ReadAllText(Lap));
+        LimProjectManager.LapPath = Lap;
+        MethodInfo Load = typeof(LimProjectManager).GetMethod("LoadCurrentProject", BindingFlags.NonPublic | BindingFlags.Instance);
+        Pm.StartCoroutine((IEnumerator)Load.Invoke(Pm, null));
+        double Deadline = EditorApplication.timeSinceStartup + 60;
+        while (T == null || !T.isInitialized || T.MediaPlayerManager == null)
+        {
+            if (EditorApplication.timeSinceStartup > Deadline) { Note("project never loaded"); yield break; }
+            yield return null;
+        }
+        yield return Wait(1);
+        LimSystem.Preferences.NoteEffects = LimSystem.Preferences.ComboCounter = LimSystem.Preferences.JudgeLineOrnaments = LimSystem.Preferences.LanotaHeader = true;
+        LimSystem.Preferences.FlickArrows = LimSystem.Preferences.BackgroundWave = true;
+        LimSystem.Preferences.ShowScore = true;
+        LimSystem.Preferences.CustomTunerSkin = "";
+        Note("prefs arrows=" + LimSystem.Preferences.FlickArrows + " wave=" + LimSystem.Preferences.BackgroundWave + " score=" + LimSystem.Preferences.ShowScore);
+        LimMediaPlayerManager M = T.MediaPlayerManager;
+        LimSystem.Preferences.HdCore = false; LimSystem.Preferences.HdRails = false;
+        M.IsPlaying = false; M.Time = 58.3f;
+        yield return Wait(0.4);
+        Capture("hold_plain");
+        LimSystem.Preferences.HdCore = true; LimSystem.Preferences.HdRails = true;
+        yield return Wait(0.3);
+        Capture("hold_hd");
+        M.Time = 57.5f;
+        yield return Wait(0.3);
+        Capture("rails_unpressed_hd");
+        LimSystem.Preferences.HdRails = false;
+        yield return Wait(0.3);
+        Capture("rails_unpressed_plain");
+        LimSystem.Preferences.HdRails = true;
+
+        // Perfect Purified at the end of the chart.
+        M.Time = 141.5f;
+        yield return null;
+        M.IsPlaying = true;
+        foreach (object Step in ShootAt(new[] { 142.05f, 142.25f, 142.6f, 143.2f, 145.5f })) yield return Step;
+        M.IsPlaying = false;
+        yield return Wait(0.3);
+
+        // Ready from the start.
+        LimSystem.Preferences.ReadyIntro = true;
+        M.Time = 0;
+        yield return Wait(0.3);
+        M.IsPlaying = true;
+        double Began = EditorApplication.timeSinceStartup;
+        yield return Wait(0.5); Note("ready +0.5 time=" + M.Time + " playing=" + M.IsPlaying); Capture("ready_05");
+        yield return Wait(1.0); Capture("ready_15");
+        yield return Wait(1.5); Capture("ready_30");
+        yield return Wait(1.3); Note("ready +4.3 time=" + M.Time + " playing=" + M.IsPlaying); Capture("ready_after");
+        M.IsPlaying = false;
+        // Skipping: play, then play again.
+        M.Time = 0; yield return Wait(0.3);
+        M.IsPlaying = true; yield return Wait(0.5);
+        M.IsPlaying = true; yield return Wait(0.5);
+        Note("skip: time=" + M.Time + " playing=" + M.IsPlaying);
+        M.IsPlaying = false;
+        LimSystem.Preferences.ReadyIntro = false;
+        Note("done");
+    }
+
+    static string FindText(Transform Root, string Name)
+    {
+        foreach (Text X in Root.GetComponentsInChildren<Text>(true)) if (X.name == Name) return X.text + " active=" + X.gameObject.activeInHierarchy;
+        return "none";
+    }
+
+    static void CountArrows()
+    {
+        int Flicks = 0, Arrows = 0;
+        foreach (Lanotalium.Chart.LanotaTapNote Note in T.TapNoteManager.TapNote)
+        {
+            if (Note.Type != 2 && Note.Type != 3) continue;
+            ++Flicks;
+            if (Note.TapNoteGameObject.transform.Find("FlickArrow") != null) ++Arrows;
+        }
+        UiTweakPlayTest.Note("flicks=" + Flicks + " with arrows=" + Arrows);
+    }
+
+    static IEnumerable<object> ShootAt(float[] At)
+    {
+        foreach (float Time in At)
+        {
+            double Deadline = EditorApplication.timeSinceStartup + 10;
+            while (T.ChartTime < Time && EditorApplication.timeSinceStartup < Deadline) yield return null;
+            Capture("t" + T.ChartTime.ToString("00.000"));
+        }
+    }
+
+    static void Capture(string Name)
+    {
+        Camera Cam = UnityEngine.Object.FindObjectOfType<LimTunerWindowManager>().TunerCamera;
+        RenderTexture Rt = RenderTexture.GetTemporary(1280, 720, 24);
+        RenderTexture Old = Cam.targetTexture;
+        Cam.targetTexture = Rt;
+        Cam.Render();
+        Cam.targetTexture = Old;
+        Read(Rt, Name);
+        RenderTexture.ReleaseTemporary(Rt);
+    }
+
+    static void Read(RenderTexture Rt, string Name)
+    {
+        RenderTexture Before = RenderTexture.active;
+        RenderTexture.active = Rt;
+        Texture2D Tex = new Texture2D(Rt.width, Rt.height, TextureFormat.RGB24, false);
+        Tex.ReadPixels(new Rect(0, 0, Rt.width, Rt.height), 0, 0);
+        Tex.Apply();
+        RenderTexture.active = Before;
+        File.WriteAllBytes(Shots + Name + ".png", Tex.EncodeToPNG());
+        UnityEngine.Object.DestroyImmediate(Tex);
+        Note(Name + ": chart=" + T.ChartTime.ToString("0.000") + " playing=" + T.MediaPlayerManager.IsPlaying);
+    }
+}
