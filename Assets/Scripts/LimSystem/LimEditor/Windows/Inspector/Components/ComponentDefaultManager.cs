@@ -81,7 +81,7 @@ public class ComponentDefaultManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float RadiusTmp;
-        if (!float.TryParse(Radius.text, out RadiusTmp))
+        if (!LimNumber.TryParseFloat(Radius.text, out RadiusTmp))
         {
             RadiusImg.color = InvalidColor;
             return;
@@ -93,7 +93,7 @@ public class ComponentDefaultManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float DegreeTmp;
-        if (!float.TryParse(Degree.text, out DegreeTmp))
+        if (!LimNumber.TryParseFloat(Degree.text, out DegreeTmp))
         {
             DegreeImg.color = InvalidColor;
             return;
@@ -105,7 +105,7 @@ public class ComponentDefaultManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float HeightTmp;
-        if (!float.TryParse(Height.text, out HeightTmp))
+        if (!LimNumber.TryParseFloat(Height.text, out HeightTmp))
         {
             HeightImg.color = InvalidColor;
             return;
@@ -117,7 +117,7 @@ public class ComponentDefaultManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float RotationTmp;
-        if (!float.TryParse(Rotation.text, out RotationTmp))
+        if (!LimNumber.TryParseFloat(Rotation.text, out RotationTmp))
         {
             RotationImg.color = InvalidColor;
             return;

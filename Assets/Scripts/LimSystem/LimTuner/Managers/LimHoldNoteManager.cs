@@ -15,16 +15,27 @@ public class LimHoldNoteManager : MonoBehaviour
     public GameObject oT5S0, oT5S1, oT5S2, oT5S3;
     public GameObject oTJoint;
 
+    /// <summary>
+    /// The box that makes a joint clickable, in the joint's own units, half
+    /// the width of a note's so that a joint sitting on a rail under a note
+    /// does not steal the note's clicks. The joint prefab ships without a
+    /// collider because the game never had to pick one up; the editor does.
+    /// </summary>
+    private static readonly Vector3 JointColliderSize = new Vector3(1.5f, 1f, 0f);
+
     void Update()
     {
         if (!isInitialized) return;
+        LimTimeGroups.EvaluateFrame(Tuner.ChartTime, Tuner.CameraManager);
         UpdateAllNoteShouldUpdate();
         UpdateAllNoteTransforms();
         UpdateAllLineMaterial();
         UpdateAllLineRenderers();
+        UpdateGroupLineLook();
         UpdateAllNoteActive();
         UpdateAllJointActive();
         UpdateAllNoteColor();
+        UpdateAllJointColor();
         UpdateNoteAudioEffect();
     }
 
@@ -76,6 +87,8 @@ public class LimHoldNoteManager : MonoBehaviour
             {
                 Note.Joints[i].JointGameObject = Instantiate(oTJoint, transform);
                 Note.Joints[i].InstanceId = Note.Joints[i].JointGameObject.GetInstanceID();
+                Note.Joints[i].Sprite = Note.Joints[i].JointGameObject.GetComponentInChildren<SpriteRenderer>(true);
+                EnsureJointCollider(Note.Joints[i].JointGameObject);
                 Note.Joints[i].JointGameObject.SetActive(false);
             }
         }
@@ -84,7 +97,23 @@ public class LimHoldNoteManager : MonoBehaviour
     {
         Joint.JointGameObject = Instantiate(oTJoint, transform);
         Joint.InstanceId = Joint.JointGameObject.GetInstanceID();
+        Joint.Sprite = Joint.JointGameObject.GetComponentInChildren<SpriteRenderer>(true);
+        EnsureJointCollider(Joint.JointGameObject);
         Joint.JointGameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// On the root, where the instance id that identifies the joint lives:
+    /// selection compares the id of the object the ray hit, so a collider on
+    /// a child would be hit and never recognised.
+    /// </summary>
+    private static void EnsureJointCollider(GameObject Joint)
+    {
+        if (Joint == null) return;
+        if (Joint.GetComponent<Collider>() != null) return;
+        BoxCollider Box = Joint.AddComponent<BoxCollider>();
+        Box.size = JointColliderSize;
+        Box.center = Vector3.zero;
     }
     private void InstantiateNotes()
     {
@@ -95,11 +124,39 @@ public class LimHoldNoteManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The scroll list of the note being worked on, set at the top of each
+    /// note in the loops that place them and cleared after. Null is the
+    /// chart's own, which is every note of the base group.
+    /// </summary>
+    private List<Lanotalium.Chart.LanotaScroll> NoteScroll;
+    /// <summary>Degrees the note's group is turned by, set alongside NoteScroll.</summary>
+    private float NoteGroupRotation;
+    private void UseScrollOf(Lanotalium.Chart.LanotaHoldNote Note)
+    {
+        NoteScroll = LimTimeGroups.UsesOwnScroll(Note.Group) ? LimTimeGroups.ScrollFor(Note.Group, Tuner.ScrollManager) : null;
+        NoteGroupRotation = LimTimeGroups.NoteRotation(Note.Group);
+    }
+    /// <summary>
+    /// The turn a note is drawn at: the camera's, plus its group's. Stored
+    /// degrees stay the chart's own, so whatever adds this to draw subtracts
+    /// it again before writing a joint's aDegree back.
+    /// </summary>
+    private float ViewRotation
+    {
+        get { return Tuner.CameraManager.CurrentRotation + NoteGroupRotation; }
+    }
+    /// <summary>Whether the note's own scroll is running backwards right now.</summary>
+    private bool IsBackwarding(Lanotalium.Chart.LanotaHoldNote Note)
+    {
+        if (!LimTimeGroups.UsesOwnScroll(Note.Group)) return Tuner.ScrollManager.IsBackwarding;
+        return LimTimeGroups.SpeedAt(LimTimeGroups.ScrollFor(Note.Group, Tuner.ScrollManager), Tuner.ChartTime) < 0;
+    }
     private float CalculateMovePercent(float JudgeTime)
     {
         int StartScroll = 0, EndScroll = 0;
         float Percent = 100;
-        List<Lanotalium.Chart.LanotaScroll> Scroll = Tuner.ScrollManager.Scroll;
+        List<Lanotalium.Chart.LanotaScroll> Scroll = NoteScroll ?? Tuner.ScrollManager.Scroll;
         int count = Scroll.Count;
         for (int i = 0; i < count - 1; ++i)
         {
@@ -249,12 +306,12 @@ public class LimHoldNoteManager : MonoBehaviour
                     continue;
                 }
                 float Percent = (Tuner.ChartTime - LastaTime) / Joint.dTime;
-                return Tuner.CameraManager.CurrentRotation + LastaDegree + Joint.dDegree * CalculateEasedCurve(Percent, Joint.Cfmi);
+                return ViewRotation + LastaDegree + Joint.dDegree * CalculateEasedCurve(Percent, Joint.Cfmi);
             }
             if (Note.Joints.Count != 0)
-                return Tuner.CameraManager.CurrentRotation + Note.Joints[Note.Joints.Count - 1].aDegree;
+                return ViewRotation + Note.Joints[Note.Joints.Count - 1].aDegree;
         }
-        return Tuner.CameraManager.CurrentRotation + Note.Degree;
+        return ViewRotation + Note.Degree;
     }
     private Vector3 CalculateLineRendererPoint(float Percent, float Degree)
     {
@@ -264,7 +321,7 @@ public class LimHoldNoteManager : MonoBehaviour
     private void UpdateJointTransform(Lanotalium.Chart.LanotaHoldNote Note)
     {
         float aTime = Note.Time;
-        float aDegree = Note.Degree + Tuner.CameraManager.CurrentRotation;
+        float aDegree = Note.Degree + ViewRotation;
         if (Note.Joints != null)
         {
             for (int i = 0; i < Note.Joints.Count - 1; ++i)
@@ -280,7 +337,7 @@ public class LimHoldNoteManager : MonoBehaviour
                 Joint.JointGameObject.transform.position = new Vector3(-Percent / 10 * Mathf.Sin(aDegree * Mathf.Deg2Rad), 0, -Percent / 10 * Mathf.Cos(aDegree * Mathf.Deg2Rad));
                 Joint.JointGameObject.transform.localScale = new Vector3(Percent / 100, Percent / 100, 0);
                 Joint.aTime = aTime;
-                Joint.aDegree = aDegree - Tuner.CameraManager.CurrentRotation;
+                Joint.aDegree = aDegree - ViewRotation;
             }
         }
     }
@@ -294,7 +351,14 @@ public class LimHoldNoteManager : MonoBehaviour
     {
         foreach (Lanotalium.Chart.LanotaHoldNote Note in HoldNote)
         {
-            Note.shouldUpdate = true;
+            // See the tap notes: a group moving by its own speed skips the
+            // chart's culling and is placed every frame.
+            if (LimTimeGroups.UsesOwnScroll(Note.Group))
+            {
+                Note.shouldUpdate = LimTimeGroups.IsVisible(Note.Group);
+                continue;
+            }
+            Note.shouldUpdate = LimTimeGroups.IsVisible(Note.Group);
             if (!LimScanTime.Instance.IsHoldNoteinScanRange(Note))
             {
                 Note.shouldUpdate = false;
@@ -309,6 +373,7 @@ public class LimHoldNoteManager : MonoBehaviour
             {
                 continue;
             }
+            UseScrollOf(Note);
             float Percent = CalculateMovePercent(Note.Time);
             Percent = CalculateEasedPercent(Percent);
             Note.Percent = Percent;
@@ -320,6 +385,8 @@ public class LimHoldNoteManager : MonoBehaviour
             Note.HoldNoteGameObject.transform.localScale = new Vector3(Percent / 100, Percent / 100, 0);
             Note.FinalDegree = RotatedDegree;
         }
+        NoteScroll = null;
+        NoteGroupRotation = 0;
     }
     private void UpdateAllLineRenderers()
     {
@@ -330,9 +397,10 @@ public class LimHoldNoteManager : MonoBehaviour
                 continue;
             }
             if (Note.Percent < 20) continue;
+            UseScrollOf(Note);
             if (Note.Jcount == 0)
             {
-                float Rotation = Note.Degree + Tuner.CameraManager.CurrentRotation;
+                float Rotation = Note.Degree + ViewRotation;
                 float EndPercent = CalculateMovePercent(Note.Time + Note.Duration);
                 Note.LineRenderer.positionCount = 10;
                 Note.LineRenderer.startWidth = Note.Percent / 100 + (Note.OnTouch ? OnTouchWidthAdd : 0);
@@ -364,7 +432,7 @@ public class LimHoldNoteManager : MonoBehaviour
                         if (Note.Time < Tuner.ChartTime)
                         {
                             float startDegreePercent = (Tuner.ChartTime - currentaTime) / Joint.dTime;
-                            AddLineRendererPosition(positionIndex, Note.LineRenderer, CalculateLineRendererPoint(100, currentaDegree + Joint.dDegree * CalculateEasedCurve(startDegreePercent, Joint.Cfmi) + Tuner.CameraManager.CurrentRotation));
+                            AddLineRendererPosition(positionIndex, Note.LineRenderer, CalculateLineRendererPoint(100, currentaDegree + Joint.dDegree * CalculateEasedCurve(startDegreePercent, Joint.Cfmi) + ViewRotation));
                             positionIndex++;
                         }
                         headPointAdded = true;
@@ -380,7 +448,7 @@ public class LimHoldNoteManager : MonoBehaviour
                         float percent = CalculateEasedPercent(CalculateMovePercent(timing));
                         lastPercent = percent;
                         if (percent == 100 && timing <= Tuner.ChartTime) continue;
-                        AddLineRendererPosition(positionIndex, Note.LineRenderer, CalculateLineRendererPoint(percent, degree + Tuner.CameraManager.CurrentRotation));
+                        AddLineRendererPosition(positionIndex, Note.LineRenderer, CalculateLineRendererPoint(percent, degree + ViewRotation));
                         positionIndex++;
                         if (percent <= 15) goto end;
                     }
@@ -395,6 +463,8 @@ public class LimHoldNoteManager : MonoBehaviour
                 Note.LineRenderer.positionCount = positionIndex;
             }
         }
+        NoteScroll = null;
+        NoteGroupRotation = 0;
     }
     private void UpdateAllNoteActive()
     {
@@ -410,7 +480,7 @@ public class LimHoldNoteManager : MonoBehaviour
             {
                 if (Note.Percent <= 20 || Note.Percent >= 100)
                 {
-                    if (Tuner.ScrollManager.IsBackwarding)
+                    if (IsBackwarding(Note))
                     {
                         if (Note.Percent == 100 && !Note.HoldNoteGameObject.activeInHierarchy)
                         {
@@ -501,8 +571,105 @@ public class LimHoldNoteManager : MonoBehaviour
             {
                 continue;
             }
-            if (Note.OnSelect) { if (Note.Sprite.color == NormalColor) Note.Sprite.color = OnSelectColor; }
-            else if (!Note.OnSelect) { if (Note.Sprite.color == OnSelectColor) Note.Sprite.color = NormalColor; }
+            // Compared against the colour it should be, not against the one
+            // it should not: a rail whose sprite ended up any third colour
+            // used to match neither test and stay looking picked up for the
+            // rest of the session. The tap notes were already read this way.
+            Color Wanted = Note.OnSelect ? OnSelectColor : NormalColor;
+            if (LimTimeGroups.HasEffects(Note.Group))
+            {
+                Wanted = LimTimeGroups.Shade(Note.Group, Wanted, Note.Percent, Note.OnSelect, LimTimeGroups.IsHighlight(Note.Sprite));
+                LimTimeGroups.FadeExtras(Note.HoldNoteGameObject, Note.Sprite, Note.Group, Note.OnSelect, Wanted.a);
+            }
+            else LimTimeGroups.RestoreExtras(Note.HoldNoteGameObject, Note.Sprite);
+            if (Note.Sprite.color != Wanted) Note.Sprite.color = Wanted;
+        }
+    }
+    /// <summary>
+    /// The body of a rail in a group that is faded or tinted. The body's own
+    /// materials are shared by every rail and their shader is not known to
+    /// take a colour, so such a rail is drawn with a copy that wears the same
+    /// texture on the sprite shader, which does, and handed its colour through
+    /// the line's own start and end colours: the head end faded as the head
+    /// is, the tail end as the tail is. A rail with nothing to show goes back
+    /// to the shared material, so a group left plain looks exactly as before.
+    /// </summary>
+    private void UpdateGroupLineLook()
+    {
+        foreach (Lanotalium.Chart.LanotaHoldNote Note in HoldNote)
+        {
+            if (!Note.shouldUpdate || Note.LineRenderer == null) continue;
+            Material Shared = Note.OnTouch ? HoldTouch : HoldUntouch;
+            if (!LimTimeGroups.HasEffects(Note.Group))
+            {
+                // A rail that has just left its group, or whose group was
+                // removed, still wearing the copy: it gets the shared one back.
+                if (FadeMaterials.ContainsValue(Note.LineRenderer.sharedMaterial) && Note.LineRenderer.sharedMaterial != null)
+                {
+                    Note.LineRenderer.sharedMaterial = Shared;
+                    Note.LineRenderer.startColor = Color.white;
+                    Note.LineRenderer.endColor = Color.white;
+                }
+                continue;
+            }
+            UseScrollOf(Note);
+            float TailPercent = CalculateEasedPercent(CalculateMovePercent(Note.Time + Note.Duration));
+            Color HeadShade = LimTimeGroups.Shade(Note.Group, Color.white, Note.Percent, Note.OnSelect);
+            Color TailShade = LimTimeGroups.Shade(Note.Group, Color.white, TailPercent, Note.OnSelect);
+            bool Plain = HeadShade == Color.white && TailShade == Color.white;
+            Material Wanted = Plain ? Shared : FadeMaterialFor(Shared);
+            if (Wanted == null) Wanted = Shared;
+            if (Note.LineRenderer.sharedMaterial != Wanted) Note.LineRenderer.sharedMaterial = Wanted;
+            if (Wanted == Shared)
+            {
+                if (Note.LineRenderer.startColor != Color.white) Note.LineRenderer.startColor = Color.white;
+                if (Note.LineRenderer.endColor != Color.white) Note.LineRenderer.endColor = Color.white;
+                continue;
+            }
+            Color Own = SharedColorOf(Shared);
+            Note.LineRenderer.startColor = Own * HeadShade;
+            Note.LineRenderer.endColor = Own * TailShade;
+        }
+        NoteScroll = null;
+        NoteGroupRotation = 0;
+    }
+    private readonly Dictionary<Material, Material> FadeMaterials = new Dictionary<Material, Material>();
+    private Material FadeMaterialFor(Material Shared)
+    {
+        if (Shared == null) return null;
+        Material Made;
+        if (FadeMaterials.TryGetValue(Shared, out Made)) return Made;
+        Shader Sprite = Shader.Find("Sprites/Default");
+        if (Sprite == null) { FadeMaterials[Shared] = null; return null; }
+        Made = new Material(Sprite);
+        if (Shared.HasProperty("_MainTex")) Made.mainTexture = Shared.GetTexture("_MainTex");
+        Made.renderQueue = 3000;
+        FadeMaterials[Shared] = Made;
+        return Made;
+    }
+    private static Color SharedColorOf(Material Shared)
+    {
+        return Shared != null && Shared.HasProperty("_Color") ? Shared.GetColor("_Color") : Color.white;
+    }
+    /// <summary>
+    /// A picked-up joint is coloured the way a picked-up note is. Painted
+    /// here rather than when it is selected because a joint's object comes
+    /// and goes as rails are cut and mended, and this way a new one is right
+    /// on the frame it appears.
+    /// </summary>
+    private void UpdateAllJointColor()
+    {
+        foreach (Lanotalium.Chart.LanotaHoldNote Note in HoldNote)
+        {
+            if (!Note.shouldUpdate) continue;
+            if (Note.Joints == null) continue;
+            foreach (Lanotalium.Chart.LanotaJoints Joint in Note.Joints)
+            {
+                if (Joint.Sprite == null) continue;
+                Color Wanted = Joint.OnSelect ? OnSelectColor : NormalColor;
+                if (LimTimeGroups.HasEffects(Note.Group)) Wanted = LimTimeGroups.Shade(Note.Group, Wanted, Joint.Percent, Joint.OnSelect);
+                if (Joint.Sprite.color != Wanted) Joint.Sprite.color = Wanted;
+            }
         }
     }
     private void UpdateNoteAudioEffect()

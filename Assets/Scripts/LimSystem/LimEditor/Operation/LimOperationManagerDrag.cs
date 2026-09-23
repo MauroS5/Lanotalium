@@ -13,6 +13,12 @@ using UnityEngine;
 /// with the box-selection rectangle) the whole selection moves rigidly,
 /// keeping every relative offset.
 ///
+/// The joints of a rail are dragged by the same code and behave like notes:
+/// one moves on its own, the rest of the rail stays where it was, and the
+/// joint after it takes up the slack. See LimOperationManagerRail.
+///
+/// Holding Ctrl fans the selection instead of moving it: see ApplyFan.
+///
 /// Snapping follows the two "Attach to" toggles of the click-to-create
 /// panel: with Beatline on the dragged note lands exactly on a beatline,
 /// with Angleline on it lands exactly on an angleline, hopping to the
@@ -27,15 +33,22 @@ public partial class LimOperationManager
 {
     private const float DragThresholdPixels = 4f;
 
+    /// <summary>
+    /// One thing being dragged: a note, a rail, or one joint of a rail, in
+    /// which case Hold is the rail it belongs to. A joint's place on the
+    /// chart is the absolute time and degree it has reached, not the step it
+    /// carries, which is what makes it move like a note.
+    /// </summary>
     private class DragItem
     {
         public Lanotalium.Chart.LanotaTapNote Tap;
         public Lanotalium.Chart.LanotaHoldNote Hold;
+        public Lanotalium.Chart.LanotaJoints Joint;
         public float OriginTime;
         public float OriginDegree;
 
-        public float Time { get { return Tap != null ? Tap.Time : Hold.Time; } }
-        public float Degree { get { return Tap != null ? Tap.Degree : Hold.Degree; } }
+        public float Time { get { return Joint != null ? Joint.aTime : (Tap != null ? Tap.Time : Hold.Time); } }
+        public float Degree { get { return Joint != null ? Joint.aDegree : (Tap != null ? Tap.Degree : Hold.Degree); } }
     }
 
     private readonly List<DragItem> _DragItems = new List<DragItem>();
@@ -45,11 +58,11 @@ public partial class LimOperationManager
     private bool _DragActive;
     private bool _DragConsumedClick;
     private bool _DragFreeMove;
+    private bool _DragFanMode;
 
     private Vector3 _DragMouseDownPosition;
     private float _DragGrabTime;
     private float _DragGrabDegree;
-    private float _DragAnchorOriginAbsDegree;
 
     /// <summary>True while notes are actually following the pointer.</summary>
     public bool IsDraggingNote { get { return _DragActive; } }
@@ -69,6 +82,9 @@ public partial class LimOperationManager
         if (_PasteActive || _PasteCommitFrame == UnityEngine.Time.frameCount) { CancelDragTracking(); return; }
         // Creating notes owns the left button while it is switched on.
         if (LimClickToCreateManager.IsCreating) { CancelDragTracking(); return; }
+        // Ctrl and the left button belong to dragging the tuner itself, or
+        // to pulling the end of a rail about.
+        if (_TunerPanActive || _RailHandleActive) { CancelDragTracking(); return; }
 
         if (Input.GetMouseButtonDown(0)) BeginDragCandidate();
         else if (Input.GetMouseButton(0)) UpdateDragCandidate();
@@ -102,8 +118,13 @@ public partial class LimOperationManager
         else
         {
             int HoldIndex = FindHoldNoteIndexByInstanceID(InstanceId);
-            if (HoldIndex == -1) return;
-            _DragAnchor = new DragItem { Hold = TunerManager.HoldNoteManager.HoldNote[HoldIndex] };
+            if (HoldIndex != -1) _DragAnchor = new DragItem { Hold = TunerManager.HoldNoteManager.HoldNote[HoldIndex] };
+            else
+            {
+                RailJoint Grabbed = FindJointByInstanceId(InstanceId);
+                if (Grabbed == null) return;
+                _DragAnchor = new DragItem { Hold = Grabbed.Hold, Joint = Grabbed.Joint };
+            }
         }
 
         _DragPending = true;
@@ -119,11 +140,15 @@ public partial class LimOperationManager
         // Shift pressed as the drag begins disables snapping for the gesture.
         _DragFreeMove = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        bool AnchorAlreadySelected = _DragAnchor.Tap != null ? IsTapNoteSelected(_DragAnchor.Tap) : IsHoldNoteSelected(_DragAnchor.Hold);
+        bool AnchorAlreadySelected;
+        if (_DragAnchor.Joint != null) AnchorAlreadySelected = IsJointSelected(_DragAnchor.Joint);
+        else if (_DragAnchor.Tap != null) AnchorAlreadySelected = IsTapNoteSelected(_DragAnchor.Tap);
+        else AnchorAlreadySelected = IsHoldNoteSelected(_DragAnchor.Hold);
         if (!AnchorAlreadySelected)
         {
             // Grabbing an unselected note selects it alone, like clicking it.
-            if (_DragAnchor.Tap != null) SelectTapNote(_DragAnchor.Tap);
+            if (_DragAnchor.Joint != null) SelectJoint(_DragAnchor.Hold, _DragAnchor.Joint);
+            else if (_DragAnchor.Tap != null) SelectTapNote(_DragAnchor.Tap);
             else SelectHoldNote(_DragAnchor.Hold);
         }
 
@@ -138,9 +163,20 @@ public partial class LimOperationManager
         }
         foreach (Lanotalium.Chart.LanotaHoldNote Hold in SelectedHoldNote)
         {
-            DragItem Item = Hold == _DragAnchor.Hold ? _DragAnchor : new DragItem { Hold = Hold };
+            DragItem Item = (_DragAnchor.Joint == null && Hold == _DragAnchor.Hold) ? _DragAnchor : new DragItem { Hold = Hold };
             if (Item == _DragAnchor) AnchorInSelection = true;
             Item.OriginTime = Hold.Time; Item.OriginDegree = Hold.Degree;
+            _DragItems.Add(Item);
+        }
+        foreach (RailJoint Selected in SelectedJoints)
+        {
+            // Worked out from the steps before anything is read off, so a
+            // joint that has not been redrawn this frame still starts where
+            // it really is.
+            RefreshJointAbsolutes(Selected.Hold);
+            DragItem Item = Selected.Joint == _DragAnchor.Joint ? _DragAnchor : new DragItem { Hold = Selected.Hold, Joint = Selected.Joint };
+            if (Item == _DragAnchor) AnchorInSelection = true;
+            Item.OriginTime = Selected.Joint.aTime; Item.OriginDegree = Selected.Joint.aDegree;
             _DragItems.Add(Item);
         }
         if (!AnchorInSelection || _DragItems.Count == 0) return false;
@@ -151,7 +187,10 @@ public partial class LimOperationManager
         if (!LimTunerCoordinate.TryGetChartPointAtMouse(TunerWindowRect, TunerCamera, TunerManager, out GrabTime, out GrabDegree)) return false;
         _DragGrabTime = GrabTime;
         _DragGrabDegree = GrabDegree;
-        _DragAnchorOriginAbsDegree = _DragAnchor.OriginDegree + TunerManager.CameraManager.CalculateCameraRotation(_DragAnchor.OriginTime);
+
+        // Ctrl fans the selection out instead of moving it about, which only
+        // means anything with more than one note in hand.
+        _DragFanMode = _DragItems.Count > 1 && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
 
         _DragActive = true;
         return true;
@@ -171,15 +210,31 @@ public partial class LimOperationManager
         float PointerTime, PointerDegree;
         if (!LimTunerCoordinate.TryGetChartPointAtMouse(TunerWindowRect, TunerCamera, TunerManager, out PointerTime, out PointerDegree)) return;
 
-        // Move the anchor by how far the pointer travelled, then snap the
-        // anchor itself. Snapping the note rather than the cursor is what
-        // makes it land exactly on a beatline or angleline.
-        float AnchorTime = _DragAnchor.OriginTime + (PointerTime - _DragGrabTime);
-        float AnchorAbsDegree = _DragAnchorOriginAbsDegree + Mathf.DeltaAngle(_DragGrabDegree, PointerDegree);
-        AnchorTime = ApplyBeatlineSnap(AnchorTime);
-        AnchorAbsDegree = ApplyAnglelineSnap(AnchorAbsDegree);
+        if (_DragFanMode)
+        {
+            float FanDegree = _DragAnchor.OriginDegree + Mathf.DeltaAngle(_DragGrabDegree, PointerDegree);
+            if (ApplyFan(ApplyAnglelineSnap(FanDegree)))
+            {
+                if (InspectorManager != null) InspectorManager.OnSelectChange();
+                return;
+            }
+            // Nothing to fan about: fall through and move the group as usual.
+            _DragFanMode = false;
+        }
 
-        ApplyToNote(_DragAnchor, AnchorTime, AnchorAbsDegree, true);
+        // Move the anchor by how far the pointer travelled, then snap the
+        // anchor itself: snapping the note rather than the cursor is what
+        // makes it land exactly on a beatline or angleline.
+        //
+        // All of it in the note's own degrees. The pointer's travel is a
+        // difference between two on-screen degrees, so the camera's rotation
+        // cancels out of it and never has to be added or taken off.
+        float AnchorTime = _DragAnchor.OriginTime + (PointerTime - _DragGrabTime);
+        float AnchorDegree = _DragAnchor.OriginDegree + Mathf.DeltaAngle(_DragGrabDegree, PointerDegree);
+        AnchorTime = ApplyBeatlineSnap(AnchorTime);
+        AnchorDegree = ApplyAnglelineSnap(AnchorDegree);
+
+        ApplyToNote(_DragAnchor, AnchorTime, AnchorDegree, false);
 
         // Everything else follows rigidly, in the chart's own coordinates.
         float DeltaTime = _DragAnchor.Time - _DragAnchor.OriginTime;
@@ -194,6 +249,80 @@ public partial class LimOperationManager
         if (InspectorManager != null) InspectorManager.OnSelectChange();
     }
 
+    /// <summary>
+    /// Fans the selection out. Both ends of the run, the first note and the
+    /// last, stay exactly where they were; the note being dragged goes where
+    /// the pointer is; every other note is put on the straight line between
+    /// the end on its own side and the dragged note, spaced by its own
+    /// timing.
+    ///
+    /// So dragging an end swings the whole run as one line, and dragging a
+    /// note from the middle bends the run at that note and leaves it looking
+    /// like a > with the point where the pointer is. Nothing is ever carried
+    /// past an end: the two notes that hold the run in place are the two the
+    /// eye reads it by.
+    ///
+    /// Only the degrees move. The gesture is about the shape of the run, and
+    /// dragging the timings about at the same time would make the lines it is
+    /// measured against move as it is being drawn.
+    ///
+    /// Returns false when there is nothing to fan about, which is a selection
+    /// whose notes all fall at the same moment: there is no run to spread.
+    /// </summary>
+    private bool ApplyFan(float DraggedDegree)
+    {
+        DragItem First, Last;
+        if (!FindFanEnds(out First, out Last)) return false;
+
+        float DraggedTime = _DragAnchor.OriginTime;
+        for (int i = 0; i < _DragItems.Count; ++i)
+        {
+            DragItem Item = _DragItems[i];
+            if (Item == _DragAnchor) { ApplyToNote(Item, Item.OriginTime, DraggedDegree, false); continue; }
+
+            // A note sharing the dragged note's timing sits on the point of
+            // the bend and has nowhere of its own to be, so it is left where
+            // it is rather than piled onto the note being dragged.
+            if (Mathf.Abs(Item.OriginTime - DraggedTime) < 0.0001f)
+            {
+                ApplyToNote(Item, Item.OriginTime, Item.OriginDegree, false);
+                continue;
+            }
+
+            // The end of the run on this note's side of the one being
+            // dragged. Dragging an end leaves every note on the same side,
+            // which is what makes that case one straight line.
+            DragItem End = Item.OriginTime < DraggedTime ? First : Last;
+            float Span = DraggedTime - End.OriginTime;
+            if (Mathf.Abs(Span) < 0.0001f) { ApplyToNote(Item, Item.OriginTime, Item.OriginDegree, false); continue; }
+
+            // Measured as a turn from the end rather than a difference of two
+            // degrees, so a run lying across 0 does not fan the wrong way.
+            float Reach = Mathf.DeltaAngle(End.OriginDegree, DraggedDegree);
+            float Percent = (Item.OriginTime - End.OriginTime) / Span;
+            ApplyToNote(Item, Item.OriginTime, End.OriginDegree + Reach * Percent, false);
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// The first and last notes of the selection in time, which are the two
+    /// the fan is pinned to. False when they are the same note, meaning the
+    /// whole selection falls at one moment.
+    /// </summary>
+    private bool FindFanEnds(out DragItem First, out DragItem Last)
+    {
+        First = null;
+        Last = null;
+        foreach (DragItem Item in _DragItems)
+        {
+            if (First == null || Item.OriginTime < First.OriginTime) First = Item;
+            if (Last == null || Item.OriginTime > Last.OriginTime) Last = Item;
+        }
+        if (First == null || Last == null || First == Last) return false;
+        return Mathf.Abs(Last.OriginTime - First.OriginTime) >= 0.0001f;
+    }
+
     private float ApplyBeatlineSnap(float Time)
     {
         if (_DragFreeMove) return Time;
@@ -204,13 +333,21 @@ public partial class LimOperationManager
         return FindNearestBeatlineByTime(Time);
     }
 
+    /// <summary>
+    /// Snaps a note's own degree, not an on-screen one. Working in the note's
+    /// own degrees is what makes it land on exactly the angleline that was
+    /// typed: an on-screen degree carries the camera's rotation at the
+    /// current moment, while the note is written with the rotation at its own
+    /// timing, and with a rotation motion running those two differ by a few
+    /// degrees, which is exactly what used to be left over.
+    /// </summary>
     private float ApplyAnglelineSnap(float Degree)
     {
         if (_DragFreeMove) return Degree;
         if (!LimClickToCreateManager.SnapToAngleline) return Degree;
         LimAngleLineManager Angleline = LimClickToCreateManager.SharedAnglelineManager;
-        if (Angleline == null || !Angleline.Enable || Angleline.AnglelineCount == 0) return Degree;
-        return Angleline.FindNearestAnglelineByDegree(Degree);
+        if (Angleline == null || !Angleline.Enable) return Degree;
+        return Angleline.FindNearestAnglelineByRelativeDegree(Degree);
     }
 
     /// <summary>
@@ -220,7 +357,14 @@ public partial class LimOperationManager
     /// </summary>
     private void ApplyToNote(DragItem Item, float Time, float Degree, bool DegreeIsAbsolute)
     {
-        if (Item.Tap != null)
+        if (Item.Joint != null)
+        {
+            // A joint is written in the chart's own degrees whatever the
+            // caller asked for: its step is measured from the joint before
+            // it, which never carried a camera rotation to take off.
+            WriteJointRaw(Item.Hold, Item.Joint, Time, Degree);
+        }
+        else if (Item.Tap != null)
         {
             SetTapNoteTime(Item.Tap, Time, false);
             SetTapNoteDegree(Item.Tap, Degree, DegreeIsAbsolute, false);
@@ -272,6 +416,14 @@ public partial class LimOperationManager
 
     private static void WriteRaw(DragItem Item, float Time, float Degree)
     {
+        if (Item.Joint != null)
+        {
+            // Not wrapped into 0 to 360: a rail is allowed to wind round the
+            // ring, and wrapping a joint would fold that turn back on itself.
+            WriteJointRaw(Item.Hold, Item.Joint, Time, Degree);
+            return;
+        }
+        Degree = LimMathUtil.NormalizeDegree(Degree);
         if (Item.Tap != null) { Item.Tap.Time = Time; Item.Tap.Degree = Degree; }
         else if (Item.Hold != null) { Item.Hold.Time = Time; Item.Hold.Degree = Degree; }
     }

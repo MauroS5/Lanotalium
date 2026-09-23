@@ -43,15 +43,15 @@ public class LimCopierManager : MonoBehaviour
         foreach (string Instru in InstruList)
         {
             float tTarget;
-            if (float.TryParse(Instru, out tTarget)) CopyTargets.Add(tTarget);
+            if (LimNumber.TryParseFloat(Instru, out tTarget)) CopyTargets.Add(tTarget);
             else
             {
                 float tStart, tInterval;
                 int tTimes;
                 string[] Split = Instru.Split('+', '*');
                 if (Split.Length != 3) return false;
-                if (!float.TryParse(Split[0], out tStart)) return false;
-                if (!float.TryParse(Split[1], out tInterval)) return false;
+                if (!LimNumber.TryParseFloat(Split[0], out tStart)) return false;
+                if (!LimNumber.TryParseFloat(Split[1], out tInterval)) return false;
                 if (!int.TryParse(Split[2], out tTimes)) return false;
                 for (int i = 0; i <= tTimes; ++i)
                 {
@@ -90,6 +90,7 @@ public class LimCopierManager : MonoBehaviour
                 foreach (Lanotalium.Chart.LanotaTapNote Tap in OperationManager.SelectedTapNote)
                 {
                     Lanotalium.Chart.LanotaTapNote New = Tap.DeepCopy();
+                    New.Group = LimTimeGroups.ActiveGroup;
                     New.Time += Delta;
                     OperationManager.AddTapNote(New, true, false, false);
                 }
@@ -103,6 +104,7 @@ public class LimCopierManager : MonoBehaviour
                 foreach (Lanotalium.Chart.LanotaHoldNote Hold in OperationManager.SelectedHoldNote)
                 {
                     Lanotalium.Chart.LanotaHoldNote New = Hold.DeepCopy();
+                    New.Group = LimTimeGroups.ActiveGroup;
                     New.Time += Delta;
                     OperationManager.AddHoldNote(New, true, false, false);
                 }
@@ -137,6 +139,10 @@ public class LimCopierManager : MonoBehaviour
                         Lanotalium.Chart.LanotaCameraRot NewR = (Base as Lanotalium.Chart.LanotaCameraRot).DeepCopy();
                         NewR.Time = Base.Time - FirstTime + Target;
                         OperationManager.AddRotation(NewR, false, true, false); break;
+                    case 14:
+                        Lanotalium.Chart.LanotaCameraTrs NewT = (Base as Lanotalium.Chart.LanotaCameraTrs).DeepCopy();
+                        NewT.Time = Base.Time - FirstTime + Target;
+                        OperationManager.AddTransparency(NewT, false, true, false); break;
                 }
             }
         }

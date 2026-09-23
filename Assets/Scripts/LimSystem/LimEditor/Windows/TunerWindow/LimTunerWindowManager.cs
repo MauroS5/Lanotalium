@@ -118,13 +118,23 @@ public class LimTunerWindowManager : MonoBehaviour
 
     public void EnsureSkinUIWorksProperly()
     {
+        PaintBuiltInSkin();
+        // A skin from the TunerSkin folder, if one is chosen, goes on top.
+        LimTunerSkins.Refresh(true);
+    }
+    /// <summary>
+    /// Ritmo or Física on the ring and on the panel's two buttons, as the
+    /// preferences have it, without changing anything else.
+    /// </summary>
+    public void PaintBuiltInSkin()
+    {
         switch (LimSystem.Preferences.TunerSkin)
         {
             case Lanotalium.Editor.TunerSkin.Ritmo:
-                UseRitmoSkin();
+                PaintRitmoSkin();
                 break;
             case Lanotalium.Editor.TunerSkin.Fisica:
-                UseFisicaSkin();
+                PaintFisicaSkin();
                 break;
         }
     }
@@ -137,17 +147,34 @@ public class LimTunerWindowManager : MonoBehaviour
             SkinPanel.SetActive(true);
         }
     }
+    /// <summary>
+    /// Wired to the panel's buttons. Choosing Ritmo or Física takes a skin
+    /// from the TunerSkin folder off the ring as well: it is the plain ring
+    /// that was asked for.
+    /// </summary>
     public void UseRitmoSkin()
     {
         LimSystem.Preferences.TunerSkin = Lanotalium.Editor.TunerSkin.Ritmo;
+        LimSystem.Preferences.CustomTunerSkin = string.Empty;
+        PaintRitmoSkin();
+        LimTunerSkins.Refresh(true);
+    }
+    public void UseFisicaSkin()
+    {
+        LimSystem.Preferences.TunerSkin = Lanotalium.Editor.TunerSkin.Fisica;
+        LimSystem.Preferences.CustomTunerSkin = string.Empty;
+        PaintFisicaSkin();
+        LimTunerSkins.Refresh(true);
+    }
+    private void PaintRitmoSkin()
+    {
         RitmoImg.sprite = RitmoP;
         FisicaImg.sprite = FisicaU;
         TunerBackground.sprite = RitmoBg;
         TunerBorder.sprite = RitmoBd;
     }
-    public void UseFisicaSkin()
+    private void PaintFisicaSkin()
     {
-        LimSystem.Preferences.TunerSkin = Lanotalium.Editor.TunerSkin.Fisica;
         RitmoImg.sprite = RitmoU;
         FisicaImg.sprite = FisicaP;
         TunerBackground.sprite = FisicaBg;

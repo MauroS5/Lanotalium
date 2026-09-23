@@ -40,7 +40,7 @@ public class LimChartBarManager : MonoBehaviour
         get
         {
             float _Size = 0;
-            float.TryParse(Data.Size.Replace(" MB", ""), out _Size);
+            LimNumber.TryParseFloat(Data.Size.Replace(" MB", ""), out _Size);
             return _Size;
         }
     }

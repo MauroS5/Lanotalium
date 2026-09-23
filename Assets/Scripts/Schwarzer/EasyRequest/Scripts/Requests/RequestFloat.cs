@@ -27,7 +27,7 @@ namespace EasyRequest
             get
             {
                 float value = 0;
-                bool result = float.TryParse(FloatInputField.text, out value);
+                bool result = LimNumber.TryParseFloat(FloatInputField.text, out value);
                 if (!result) return 0;
                 return value;
             }
@@ -53,7 +53,7 @@ namespace EasyRequest
         private bool ValidateInternal()
         {
             float value = 0;
-            bool result = float.TryParse(FloatInputField.text, out value);
+            bool result = LimNumber.TryParseFloat(FloatInputField.text, out value);
             if (!result) return false;
             if (float.IsNaN(value) || float.IsInfinity(value)) return false;
             if (ShouldThreshold)

@@ -1,0 +1,342 @@
+// Play-mode check of the built-in UiTweak features: opens a real project the
+// way the editor does, plays it, and saves tuner and editor screenshots at set
+// moments (taps, a flick, catches, three holds, a pause, a jump, the skins,
+// the ornaments, the header, the Preferences rows).
+//
+// To run it, with the Unity editor closed:
+//  1. Copy a project folder (Death Moon's is what the timings below expect)
+//     into Dir/testproj, and point every path in its .lap at the copies, so
+//     nothing of the original is written to (loading backs the chart up and
+//     rewrites the .lap).
+//  2. Back up %APPDATA%/Lanotalium (loading a project rewrites
+//     Preferences.json) and Library/LastSceneManagerSetup.txt.
+//  3. Copy this file to Assets/Editor/UiTweakPlayTest.cs (Dir is
+//     %TEMP%/UiTweakCheck; change it if you like) and run
+//     Unity.exe -batchmode -projectPath <proj> -logFile <log> -executeMethod UiTweakPlayTest.Run
+//     (no -quit: it enters play mode and exits by itself).
+//  4. Read Dir/playtest.txt and Dir/render/*.png, then remove Assets/Editor
+//     and put the two backups back.
+// Audio does play in batch mode, so IsPlaying behaves as in the editor.
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using Newtonsoft.Json;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.UI;
+
+[InitializeOnLoad]
+public static class UiTweakPlayTest
+{
+    // Where the copied project goes and the report and screenshots are written.
+    static readonly string Dir = Path.Combine(Path.GetTempPath(), "UiTweakCheck") + Path.DirectorySeparatorChar;
+    static readonly string Lap = Dir + @"testproj\Death Moon.lap";
+    static readonly string Shots = Dir + @"render\";
+    static StringBuilder Log = new StringBuilder();
+    static IEnumerator Script;
+    static double Started;
+    static double WaitUntil;
+
+    static UiTweakPlayTest()
+    {
+        if (SessionState.GetBool("UiTweakTest", false)) EditorApplication.update += Tick;
+    }
+
+    public static void Run()
+    {
+        SessionState.SetBool("UiTweakTest", true);
+        Directory.CreateDirectory(Shots);
+        foreach (string F in Directory.GetFiles(Shots)) File.Delete(F);
+        File.WriteAllText(Dir + "playtest.txt", "started\n");
+        EditorSceneManager.OpenScene("Assets/_Scenes/LimTuner.unity", OpenSceneMode.Single);
+        EditorApplication.update += Tick;
+        EditorApplication.isPlaying = true;
+    }
+
+    static void Tick()
+    {
+        if (!EditorApplication.isPlaying) return;
+        if (Script == null)
+        {
+            Started = EditorApplication.timeSinceStartup;
+            Application.logMessageReceived += (Msg, Stack, Type) =>
+            {
+                if (Type == LogType.Exception || Type == LogType.Error || (Type == LogType.Warning && Msg.Contains("UiTweak")))
+                    Log.AppendLine("[" + Type + "] " + Msg + "\n" + Stack);
+            };
+            Script = Steps();
+        }
+        if (EditorApplication.timeSinceStartup - Started > 300) { Note("TIMEOUT"); Finish(); return; }
+        if (EditorApplication.timeSinceStartup < WaitUntil) return;
+        try
+        {
+            if (!Script.MoveNext()) Finish();
+        }
+        catch (Exception E) { Note("SCRIPT EXCEPTION " + E); Finish(); }
+    }
+
+    static void Finish()
+    {
+        File.WriteAllText(Dir + "playtest.txt", Log.ToString());
+        SessionState.SetBool("UiTweakTest", false);
+        EditorApplication.update -= Tick;
+        EditorApplication.Exit(0);
+    }
+
+    static void Note(string S)
+    {
+        Log.AppendLine(S);
+        File.WriteAllText(Dir + "playtest.txt", Log.ToString());
+    }
+
+    static object Wait(double Seconds) { WaitUntil = EditorApplication.timeSinceStartup + Seconds; return null; }
+
+    static LimTunerManager T { get { return LimTunerManager.Instance; } }
+
+    static IEnumerator Steps()
+    {
+        // Let the uninitialised tuner scene settle, then open the project the way the editor does.
+        yield return Wait(2);
+        LimProjectManager Pm = UnityEngine.Object.FindObjectOfType<LimProjectManager>();
+        LimProjectManager.CurrentProject = JsonConvert.DeserializeObject<Lanotalium.Project.LanotaliumProject>(File.ReadAllText(Lap));
+        LimProjectManager.LapPath = Lap;
+        MethodInfo Load = typeof(LimProjectManager).GetMethod("LoadCurrentProject", BindingFlags.NonPublic | BindingFlags.Instance);
+        Pm.StartCoroutine((IEnumerator)Load.Invoke(Pm, null));
+        Note("loading project");
+        double Deadline = EditorApplication.timeSinceStartup + 60;
+        while (T == null || !T.isInitialized || T.MediaPlayerManager == null)
+        {
+            if (EditorApplication.timeSinceStartup > Deadline) { Note("project never loaded"); yield break; }
+            yield return null;
+        }
+        Note("loaded; notes tap=" + T.TapNoteManager.TapNote.Count + " hold=" + T.HoldNoteManager.HoldNote.Count);
+        yield return Wait(1);
+        Note("prefs NoteEffects=" + LimSystem.Preferences.NoteEffects + " Combo=" + LimSystem.Preferences.ComboCounter + " Orn=" + LimSystem.Preferences.JudgeLineOrnaments + " Header=" + LimSystem.Preferences.LanotaHeader + " Skin='" + LimSystem.Preferences.CustomTunerSkin + "'");
+        LimSystem.Preferences.NoteEffects = LimSystem.Preferences.ComboCounter = LimSystem.Preferences.JudgeLineOrnaments = LimSystem.Preferences.LanotaHeader = true;
+        LimSystem.Preferences.CustomTunerSkin = "";
+
+        LimMediaPlayerManager M = T.MediaPlayerManager;
+        Note("audio: isPlaying=" + M.IsPlaying + " time=" + M.Time + " pitch=" + M.Pitch + " mode=" + M.MediaPlayerMode);
+        yield return Wait(0.5);
+        Note("audio after 0.5s: isPlaying=" + M.IsPlaying + " time=" + M.Time);
+        M.IsPlaying = false;
+        M.Time = 0.5f;
+        yield return Wait(0.3);
+        Capture("00_idle");
+
+        // Taps at 14.25 + k * 0.375, all at 315.
+        foreach (object Step in PlayAndShoot(13.9f, new[] { 14.27f, 14.32f, 14.40f, 14.52f, 14.66f, 15.4f })) yield return Step;
+        // A flick out at 31.875.
+        foreach (object Step in PlayAndShoot(31.6f, new[] { 31.89f, 31.95f, 32.05f })) yield return Step;
+        // Catch notes from 52.875.
+        foreach (object Step in PlayAndShoot(52.6f, new[] { 52.9f, 53.0f })) yield return Step;
+        // Three holds from 57.953 to 60.953.
+        foreach (object Step in PlayAndShoot(57.7f, new[] { 57.98f, 58.3f, 58.7f })) yield return Step;
+        M.IsPlaying = false;
+        yield return null;
+        yield return null;
+        Capture("hold_paused_a");
+        yield return Wait(0.8);
+        Capture("hold_paused_b");
+        M.IsPlaying = true;
+        foreach (object Step in ShootAt(new[] { 59.2f, 60.97f, 61.1f })) yield return Step;
+        M.IsPlaying = false;
+        yield return Wait(0.5);
+
+        // A jump forward while playing must not set off everything in between.
+        M.Time = 13.0f;
+        M.IsPlaying = true;
+        yield return Wait(0.3);
+        M.Time = 20.0f;
+        yield return null;
+        yield return null;
+        Capture("jump_13_to_20");
+        M.IsPlaying = false;
+        yield return Wait(0.3);
+
+        // Skins, with the song paused at a quiet spot.
+        M.Time = 10f;
+        yield return Wait(0.3);
+        foreach (string Skin in new[] { "Purify HD", "Decimal", "Void", "Astra", "" })
+        {
+            LimSystem.Preferences.CustomTunerSkin = Skin;
+            yield return null;
+            yield return null;
+            Capture("skin_" + (Skin.Length == 0 ? "none" : Skin.Replace(" ", "")));
+        }
+        LimSystem.Preferences.JudgeLineOrnaments = false;
+        yield return null;
+        yield return null;
+        Capture("ornaments_off");
+        LimSystem.Preferences.JudgeLineOrnaments = true;
+        for (int i = 0; i < 4; ++i)
+        {
+            M.Time = 10f + i * 0.375f / 4;
+            yield return null;
+            yield return null;
+            Capture("glow_phase_" + i);
+        }
+
+        // The header, in full screen, where the tuner camera draws it.
+        foreach (object Step in HeaderShots()) yield return Step;
+        foreach (object Step in InterfaceChecks()) yield return Step;
+        Note("done");
+    }
+
+    static IEnumerable<object> PlayAndShoot(float From, float[] At)
+    {
+        LimMediaPlayerManager M = T.MediaPlayerManager;
+        M.IsPlaying = false;
+        M.Time = From;
+        yield return null;
+        yield return null;
+        M.IsPlaying = true;
+        foreach (object Step in ShootAt(At)) yield return Step;
+    }
+
+    static IEnumerable<object> ShootAt(float[] At)
+    {
+        foreach (float Time in At)
+        {
+            double Deadline = EditorApplication.timeSinceStartup + 10;
+            while (T.ChartTime < Time && EditorApplication.timeSinceStartup < Deadline) yield return null;
+            Capture("t" + T.ChartTime.ToString("00.000"));
+        }
+    }
+
+    static IEnumerable<object> HeaderShots()
+    {
+        LimDisplayManager Display = UnityEngine.Object.FindObjectOfType<LimDisplayManager>();
+        Camera Cam = UnityEngine.Object.FindObjectOfType<LimTunerWindowManager>().TunerCamera;
+        RenderTexture Rt = new RenderTexture(1280, 720, 24);
+        Display.FullScreenTuner = true;
+        Cam.targetTexture = Rt;
+        yield return Wait(0.3);
+        Read(Rt, "header_on_master");
+        LimProjectManager.CurrentProject.Difficulty = 3;
+        LimProjectManager.CurrentProject.Level = "12";
+        yield return Wait(0.2);
+        Read(Rt, "header_on_ultra12");
+        LimTunerHeadManager Head = UnityEngine.Object.FindObjectOfType<LimTunerHeadManager>();
+        string OldName = Head.ChartName.text;
+        Head.ChartName.text = "Canción Ñandú ありがとう";
+        Head.DesignerInputField.text = "Designer";
+        yield return Wait(0.2);
+        Read(Rt, "header_on_accents");
+        Head.ChartName.text = OldName;
+        LimSystem.Preferences.LanotaHeader = false;
+        yield return Wait(0.2);
+        Read(Rt, "header_off");
+        LimSystem.Preferences.LanotaHeader = true;
+        yield return Wait(0.2);
+        Read(Rt, "header_on_again");
+        Cam.targetTexture = null;
+        Display.FullScreenTuner = false;
+        Note("header: children of Head = " + Head.transform.childCount);
+    }
+
+    static object Field(object Owner, string Name)
+    {
+        return Owner.GetType().GetField(Name, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public).GetValue(Owner);
+    }
+
+    static IEnumerable<object> InterfaceChecks()
+    {
+        LimDisplayManager Display = UnityEngine.Object.FindObjectOfType<LimDisplayManager>();
+        Camera Main = Display.MainCamera;
+        RenderTexture Rt = new RenderTexture(1600, 900, 24);
+        Main.targetTexture = Rt;
+        yield return Wait(0.4);
+        Read(Rt, "editor_view");
+
+        // The header's own controls.
+        LimTunerHeadManager Head = UnityEngine.Object.FindObjectOfType<LimTunerHeadManager>();
+        Transform Glow = Head.transform.Find("LanotaHeader/DifficultyGlow");
+        int Before = LimProjectManager.CurrentProject.Difficulty;
+        Glow.GetComponent<Button>().onClick.Invoke();
+        Note("badge click: difficulty " + Before + " -> " + LimProjectManager.CurrentProject.Difficulty);
+        InputField Level = Glow.Find("LevelField").GetComponent<InputField>();
+        Level.text = "15";
+        Level.onEndEdit.Invoke("15");
+        Note("level typed: project level '" + LimProjectManager.CurrentProject.Level + "'");
+        bool WasPlaying = T.MediaPlayerManager.IsPlaying;
+        Head.transform.Find("LanotaHeader/Pause").GetComponent<Button>().onClick.Invoke();
+        yield return Wait(0.2);
+        Note("pause click: playing " + WasPlaying + " -> " + T.MediaPlayerManager.IsPlaying);
+        T.MediaPlayerManager.IsPlaying = false;
+        yield return Wait(0.2);
+        Read(Rt, "editor_view_master15");
+
+        // Preferences, scrolled to the rows added last.
+        LimPreferencesManager Prefs = null;
+        foreach (LimPreferencesManager P in Resources.FindObjectsOfTypeAll<LimPreferencesManager>()) if (P.gameObject.scene.IsValid()) Prefs = P;
+        Prefs.LanguageManager.SetLanguage("Español");
+        yield return Wait(0.3);
+        Prefs.OpenPreferencesMenu();
+        yield return Wait(0.3);
+        ScrollRect View = Prefs.GetComponentInChildren<ScrollRect>(true);
+        if (View != null) View.verticalNormalizedPosition = 0;
+        yield return Wait(0.3);
+        Read(Rt, "prefs_bottom");
+        Dropdown Skins = (Dropdown)Field(Prefs, "TunerSkinDropdown");
+        StringBuilder Options = new StringBuilder();
+        foreach (Dropdown.OptionData O in Skins.options) Options.Append(O.text + ", ");
+        Note("skin list (" + Skins.options.Count + "): " + Options + " value=" + Skins.value);
+        int Astra = Skins.options.FindIndex(O => O.text == "Astra");
+        Skins.value = Astra;
+        yield return null;
+        yield return null;
+        Note("after choosing Astra: pref='" + LimSystem.Preferences.CustomTunerSkin + "'");
+        Capture("prefs_skin_astra");
+        Skins.value = 1;
+        yield return null;
+        yield return null;
+        Note("after choosing Fisica: pref='" + LimSystem.Preferences.CustomTunerSkin + "' builtin=" + LimSystem.Preferences.TunerSkin);
+        Capture("prefs_skin_fisica");
+        Skins.value = 0;
+        yield return null;
+        Toggle Effects = (Toggle)Field(Prefs, "NoteEffectsToggle");
+        Effects.isOn = false;
+        Note("effects toggle off: pref=" + LimSystem.Preferences.NoteEffects);
+        Effects.isOn = true;
+        Toggle Header = (Toggle)Field(Prefs, "LanotaHeaderToggle");
+        Header.isOn = false;
+        yield return Wait(0.3);
+        Read(Rt, "prefs_header_off");
+        Header.isOn = true;
+        yield return Wait(0.3);
+        Main.targetTexture = null;
+    }
+
+    static void Capture(string Name)
+    {
+        Camera Cam = UnityEngine.Object.FindObjectOfType<LimTunerWindowManager>().TunerCamera;
+        RenderTexture Rt = RenderTexture.GetTemporary(1280, 720, 24);
+        RenderTexture Old = Cam.targetTexture;
+        Cam.targetTexture = Rt;
+        Cam.Render();
+        Cam.targetTexture = Old;
+        Read(Rt, Name);
+        RenderTexture.ReleaseTemporary(Rt);
+    }
+
+    static void Read(RenderTexture Rt, string Name)
+    {
+        RenderTexture Before = RenderTexture.active;
+        RenderTexture.active = Rt;
+        Texture2D Tex = new Texture2D(Rt.width, Rt.height, TextureFormat.RGB24, false);
+        Tex.ReadPixels(new Rect(0, 0, Rt.width, Rt.height), 0, 0);
+        Tex.Apply();
+        RenderTexture.active = Before;
+        File.WriteAllBytes(Shots + Name + ".png", Tex.EncodeToPNG());
+        UnityEngine.Object.DestroyImmediate(Tex);
+        Transform Tuner = T.CameraManager.TunerGameObject.transform;
+        StringBuilder Kids = new StringBuilder();
+        foreach (Transform C in Tuner) if (C.name.Contains("(Clone)") || C.name == "ComboText") Kids.Append(C.name.Replace("(Clone)", "") + " ");
+        Note(Name + ": chart=" + T.ChartTime.ToString("0.000") + " playing=" + T.MediaPlayerManager.IsPlaying + " rot=" + T.CameraManager.CurrentRotation.ToString("0.0") + " | " + Kids);
+    }
+}

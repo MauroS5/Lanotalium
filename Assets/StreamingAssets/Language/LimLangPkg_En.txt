@@ -12,10 +12,49 @@ Window_Inspector_Label$Inspector
 Window_Inspector_Switcher_Bpm$BPM
 Window_Inspector_Switcher_Scroll$Scroll Speed
 Window_Inspector_Switcher_Default$Default
+Window_Inspector_Switcher_TimeGroups$Time Groups
+TimeGroups_Label$Time Groups
+TimeGroups_NewName$Group
+TimeGroups_Base$Base
+TimeGroups_Add$+ Group
+TimeGroups_MoveSelected$Move selection here
+TimeGroups_Effects_On$Group effects: On
+TimeGroups_Effects_Off$Group effects: Off
+TimeGroups_BaseHasNoEffects$Base moves with the chart. Create a group or press Edit on one to give it effects.
+TimeGroups_Opacity$Opacity over time
+TimeGroups_Rotation$Group rotation
+TimeGroups_AddOpacity$+ Opacity
+TimeGroups_AddRotation$+ Rotation
+TimeGroups_Col_Timing$Timing
+TimeGroups_Col_Duration$Duration
+TimeGroups_Col_Opacity$Opacity
+TimeGroups_Col_Degrees$Degrees
+TimeGroups_Col_Ease$Ease
+TimeGroups_Fade$Fade by distance (% of the path)
+TimeGroups_FadeIn$Fully shown from
+TimeGroups_FadeOut$Starts vanishing at
+TimeGroups_Color$Group colour
+TimeGroups_NoColor$None
+TimeGroups_Hex$Hex RRGGBB
+TimeGroups_ColorHighlight$Highlight
+TimeGroups_ColorNotes$Notes
+TimeGroups_Msg_KeyExists$This group already has a key at this moment.
+TimeGroups_Msg_AlreadyThere$The selected notes are already in this group.
+TimeGroups_Active$Active
+TimeGroups_Select$Edit
+TimeGroups_Visible$Visible
+TimeGroups_Hidden$Hidden
+TimeGroups_ScrollSpeedOf$Scroll Speed:
+TimeGroups_AddSpeed$+ Speed
+TimeGroups_Msg_Moved$Notes moved to the active group.
+TimeGroups_Msg_NothingSelected$Select some notes first.
+TimeGroups_Msg_SpeedExists$This group already has a speed at this moment.
+TimeGroups_Msg_ConfirmDelete$Click delete again to remove the group and all of its notes. Ctrl + Z brings them back.
 Window_MediaPlayer_Label$Media Player
 Window_MediaPlayer_Progress$Progress
 Window_MediaPlayer_PlaybackSpeed$Speed
 Window_MediaPlayer_Pitch$Pitch
+Window_MediaPlayer_Volume$Volume
 Window_MediaPlayer_PitchReset$Reset
 Window_MediaPlayer_Play$Play
 Window_MediaPlayer_Pause$Pause
@@ -30,9 +69,11 @@ Window_TimeLine_Label$TimeLine
 Window_TimeLine_Hor_Label$Motion (Horizontal)
 Window_TimeLine_Ver_Label$Motion (Vertical)
 Window_TimeLine_Rot_Label$Motion (Rotation)
+Window_TimeLine_Trs_Label$Motion (Transparency)
 Window_TimeLine_WaveformL$Waveform L
 Window_TimeLine_WaveformR$Waveform R
 Window_TimeLine_Waveform$Waveform
+Window_TimeLine_SyncZoom$Sync Both
 Window_TimeLine_Waveform_LowMemory$Due to 32-bit memory limit, waveform disabled.
 Window_Creator_Label$Creator
 Window_Creator_CreateTap$Create Tap Note
@@ -40,6 +81,7 @@ Window_Creator_CreateHold$Create Hold Note
 Window_Creator_CreateMotionHor$Create Motion (Horizontal)
 Window_Creator_CreateMotionVer$Create Motion (Vertical)
 Window_Creator_CreateMotionRot$Create Motion (Rotation)
+Window_Creator_CreateMotionTrs$Create Motion (Transparency)
 Window_Creator_CreateMotionManually$Create Motion (Manually)
 Window_Creator_CreateBpm$Create BPM
 Window_Creator_CreateScrollSpeed$Create Scroll Speed
@@ -49,11 +91,45 @@ Window_Creator_CreateCatchRail_ErrSelection$You need to select two short notes.
 Window_Creator_CreateCatchRail_ErrQuantity$You need to input valid quantity.
 Window_Creator_CreateCatchRail_ErrRange$You need to input a number larger than 0.
 Window_Creator_CreateCatchRail_Success$Successfully created.
+Window_Creator_CreateGroupEase$Create Group Ease
+Window_Creator_CreateGroupEase_Ease$Ease
+Window_Creator_CreateGroupEase_ErrEase$Type an ease from 0 to 12. 0 lays the notes out in a straight line.
+Window_Creator_CreateGroupEase_ErrSelection$Select three or more notes at different timings first.
+Window_Creator_CreateGroupEase_Success$Group eased.
+Window_Creator_SegmentRail$Segment Hold Note
+Window_Creator_SegmentRail_Segments$Segments
+Window_Creator_SegmentRail_ErrSegments$Type how many pieces, from 2 to 64.
+Window_Creator_SegmentRail_ErrSelection$Select one rail note, and nothing else, first.
+Window_Creator_SegmentRail_Success$Rail note segmented.
+Window_Creator_RailEase$Set Rail Ease
+Window_Creator_RailEase_Ease$Ease
+Window_Creator_RailEase_ErrEase$Type an ease from 0 to 12. 0 is the straight one.
+Window_Creator_RailEase_ErrSelection$Select one or more rail notes that have joints first.
+Window_Creator_RailEase_Success$Ease written to every joint of the selected rails.
+Window_Creator_CreateCatchRail_Reverse$Reverse
+Window_Creator_CreateCatchRail_Spins$Spins
+Window_Creator_ConvertToSingleHoldNote$Convert To Single Hold Note
+Window_Creator_ConvertToSingleHoldNote_Err$Select two or more hold notes, and nothing else.
+Window_Creator_ConvertToSingleHoldNote_Success$Hold notes joined into one.
 Window_Creator_ConvertSelectedToHoldNote$Convert to Hold Note
 Window_Creator_AutoHighlight$Auto Highlight
+Window_Creator_FlipHorizontal$Flip (Horiz.)
+Window_Creator_FlipVertical$Flip (Vert.)
+Window_Creator_SelectEven$Select Even
+Window_Creator_SelectOdd$Select Odd
 Window_Creator_DeleteSelected$Delete Selected
 Window_Creator_ClickToCreate$Click To Create
+Window_Creator_Favourites$Favourite Groups
+Window_Creator_Favourites_Notes$Notes
+Window_Creator_Favourites_Motions$Motions
+Favourites_File_Title$Favourites file
+Favourites_File_Filter$Lanotalium Favourites (*.json)|*.json
 Window_Creator_Angleline$Angleline
+Window_Creator_Grid$Grid
+Window_Creator_Grid_Vertical$V.
+Window_Creator_Grid_Horizontal$H.
+Window_Creator_Grid_Placeholder$Enter a value
+Window_Creator_Opacity$Opacity
 Window_Creator_Copier$Copier
 Component_Basic_Label$Basic
 Component_Basic_Size$Size
@@ -62,7 +138,7 @@ Component_Basic_Degree$Degree
 Component_Basic_Combination$Combination
 Component_Type_Label$Type
 Component_Type_Type$Type
-Component_Type_DropDown_Type0$0 - Click
+Component_Type_DropDown_Type0$1 - Click
 Component_Type_DropDown_Type2$2 - Flick In
 Component_Type_DropDown_Type3$3 - Flick Out
 Component_Type_DropDown_Type4$4 - Catch
@@ -84,6 +160,7 @@ Component_Motion_Cfmi$Ease
 Component_Motion_Ctp0$Ctp0
 Component_Motion_Ctp1$Ctp1
 Component_Motion_Type$Type
+Component_Motion_InvertValues$Invert Values
 Component_Motion_Ctp0_Tp8$Delta Degree
 Component_Motion_Ctp1_Tp8$Delta Radius
 Component_Motion_Ctp0_Tp11$Target Degree
@@ -92,6 +169,8 @@ Component_Motion_Ctp0_Tp10$Delta Height
 Component_Motion_Ctp1_Tp10$None
 Component_Motion_Ctp0_Tp13$Rotate Degree
 Component_Motion_Ctp1_Tp13$None
+Component_Motion_Ctp0_Tp14$Transparency (0-100)
+Component_Motion_Ctp1_Tp14$None
 Component_Motion_ManuallyMotion$Manually Motion
 Component_Motion_Unavaliable$Unavaliable
 Component_Bpm_Label$BPM
@@ -118,6 +197,24 @@ Preferences_AudioEffect$Audio Effect
 Preferences_AudioEffectTheme$Effect Theme
 Preferences_Unsafe$Unsafe Motion
 Preferences_WorkingBGM$Pausing BGM
+Preferences_Waveform$Waveform
+Preferences_WaveformColor$Waveform Color
+Preferences_WaveformColor_Cyan$Cyan
+Preferences_WaveformColor_Red$Red
+Preferences_WaveformColor_Yellow$Yellow
+Preferences_WaveformColor_LightGreen$Light Green
+Preferences_WaveformColor_DarkGreen$Dark Green
+Preferences_WaveformColor_Pink$Pink
+Preferences_WaveformColor_Lilac$Lilac
+Preferences_WaveformColor_DarkBlue$Dark Blue
+Preferences_WaveformColor_Orange$Orange
+Preferences_WaveformColor_White$White
+Preferences_Theme$Theme
+Preferences_Theme_Default$Default
+Preferences_Theme_Dark$Dark
+Preferences_Theme_Light$Light
+Preferences_RailNoteVisualGuide$Rail Note Visual Guide
+Preferences_TunerBackgroundOpacity$Tuner Background Opacity
 TopMenu_ChartZone$ChartZone
 TopMenu_ChartZone_MessageBox$Will lost everything not saved, guarantee you have saved.
 TopMenu_File$File
@@ -137,11 +234,51 @@ TopMenu_Window_Spectrum$Spectrum
 TopMenu_Setting$Setting
 TopMenu_Setting_Preferences$Preferences
 TopMenu_Setting_ResetLayout$Reset Editor Layout
+TopMenu_Setting_ResetLayout_Confirm$Reset the editor layout? Every window goes back to its default size and place.
 TopMenu_Plugin$Plugin
 TopMenu_Plugin_PluginCenter$Plugin Center
-TopMenu_ChartConvert$Chart Convert
-TopMenu_ChartConvert_Bms$From Bms
-TopMenu_ChartConvert_Arcaea$From Arcaea
+TopMenu_Analyzer$Analyzer
+TopMenu_Analyzer_Automatic$Automatic
+TopMenu_Analyzer_Manual$Manual
+TopMenu_UiTweak$UiTweak
+UiTweak_NoteEffects$Note Effects
+UiTweak_ComboCounter$Combo Counter
+UiTweak_FlickArrows$Flick Arrows
+UiTweak_JudgeOrnaments$Judge Ornaments
+UiTweak_Wave$Background Wave and Particles
+UiTweak_LanotaHeader$Lanota Header
+UiTweak_ShowScore$Show Score
+UiTweak_PerfectPurified$Perfect Purified at the End
+UiTweak_ReadyIntro$Ready at the Start
+UiTweak_HdRails$HD Rails
+UiTweak_HdCore$HD Core
+UiTweak_ProgressBar$Progress Bar
+UiTweak_CustomDifficulty$Custom Difficulty…
+Header_CustomDifficulty$Custom Difficulty
+Header_ApplyColour$Apply colour
+UiTweak_CompactHighlight$Compact Highlight
+UiTweak_TunerSkin$Tuner Skin
+UiTweak_TunerSkin_Ritmo$Ritmo
+UiTweak_TunerSkin_Fisica$Fisica
+UiTweak_Credit$UiTweak by Flowaria
+Analyzer_NoMusic$This project has no song to analyse.
+Analyzer_Failed$Couldn't find this song's BPM. Try the Manual mode.
+Analyzer_Applied$BPM {0} applied. The first line is at {1} s.
+Analyzer_AppliedAll$Applied {0} BPM sections. The first line is at {1} s.
+Analyzer_ChangesFound$One or more BPM changes were detected in this song. Do you want the analyzer to take them into account?
+Analyzer_ChangeAt${0} → {1} BPM at {2} s
+Analyzer_ApplyAll$Apply every BPM
+Analyzer_KeepOriginal$Keep original BPM
+Analyzer_Manual_Title$Analyzer · Manual
+Analyzer_Manual_Tap$Tap to the beat
+Analyzer_Manual_FirstPress$Press once to play the song
+Analyzer_Manual_Taps$Taps: {0}
+Analyzer_Manual_Pause$Pause
+Analyzer_Manual_Bpm$BPM
+Analyzer_Manual_Timing$Timing
+Analyzer_Manual_Apply$Apply BPM
+Analyzer_Manual_Invalid$Enter a BPM above 0 and a Timing inside the song.
+Analyzer_Manual_Applied$BPM {0} applied from {1} s.
 TopMenu_Status$Status
 GizmoMotion_Label$Manually Motion
 GizmoMotion_ToCreate$Motion Types To Create
@@ -270,6 +407,7 @@ Error_Network$Network Error
 Layesta_Download$Download
 Layesta_Download_Hint$Layesta needs some dependencies to run.
 Layesta_NoProject$Load a project first.
+Layesta_Export$Export Layesta Level
 Layesta_Send_Hint$Send current project to this device
 Layesta_Overwrite$Re-generate audio and images 
 Layesta_Send$Send
@@ -333,10 +471,18 @@ Layesta_Contest_Warn$If you want to join contest, please fill Charter name 'Hidd
 Motion_TimeExisted$(Time Invalid) Current time already have a Motion. Failed to create.
 Motion_InPrevious$(Time Invalid) Current time is in previous Motion's duration. Failed to create.
 Motion_DurationOverflow$(Duration Invalid) Current time + duration is larger than next motion. Failed to create.
+Favourite_Saved$Saved to favourites.
+Favourite_Nothing$Select some notes or motions first.
+Favourite_Mixed$Save notes or motions, not both at once.
+Favourite_TooMany$Too many notes: 100 at most in one pattern.
+Favourite_ConfirmForget$Click again to forget this pattern.
+Favourite_Exported$Favourites saved to file.
+Favourite_Imported$Favourites added from file.
+Favourite_FileFailed$That file could not be read or written.
 Background_VideoWarning$If chart and audio not sync, adjust offset and click on fix time.
 Project_Saved$Saved.
 #HintDict
-ClickToCreate_Hotkey$Press F2 to fast enable
+ClickToCreate_Hotkey$Press C to fast enable
 Angleline_Hint$Format<br>Single：Input directly. <br>Batch：[Start]>[End]/[Quantity]<br>0>30/5 means 0,6,12,18,24,30<br>Split with ; (0;2;0>15/3)
 Copier_Hint$Format<br>Single：Input directly. <br>Batch：[Start]+[Interval]*[Times]<br>15+0.1*5 means 15 15.1 15.2 15.3 15.4 15.5<br>Split with ; (10;30;50+0.5*5)
 Layesta_Play_Hint$Click to load current project to this device
@@ -348,6 +494,16 @@ GizmoMotion_MoveMode$Left key to drag. Scroll to move vertical. Ctrl to move fas
 GizmoMotion_RotateMode$Drag around the Tuner to rotate. Ctrl to move faster.
 GizmoMotion_InputMode$Input values directly to set position. Deselect ALL modes to enable motion.
 EaseRange$Ease : 0 - 12 Integer.
+TimeGroups_Hint_Move$Puts the selected notes into the active group (the one marked Active).
+TimeGroups_Hint_Effects$On: each group moves, turns and fades as the chart will show it.<br>Off: every note moves with the chart and is not turned,<br>so notes sit exactly where you place or drag them,<br>and hidden notes are drawn faintly so you can still pick them.
+TimeGroups_Hint_Edit$Makes this the active group: new notes go into it,<br>and its settings are shown below.
+TimeGroups_Hint_Opacity$Adds a key at the playhead. Each key fades the group's notes<br>from where they were to its Opacity (0 gone, 100 fully shown),<br>over its Duration, with its Ease.
+TimeGroups_Hint_Rotation$Adds a key at the playhead. Each key turns the group's notes<br>round the core by its Degrees, over its Duration, with its Ease.<br>Keys add up, like a rotation motion.
+TimeGroups_Hint_FadeIn$Notes appear gradually from the core and are fully shown<br>once this far along their path. 0 switches it off.
+TimeGroups_Hint_FadeOut$Notes start to vanish this far along their path<br>and are gone by the judge line. 100 switches it off.
+TimeGroups_Hint_Color$A tint for the group's notes, as RRGGBB. Empty for none.
+TimeGroups_Hint_ColorHighlight$The colour also tints the glow of highlighted notes.
+TimeGroups_Hint_ColorNotes$The colour tints the notes, rails included. Untick it and keep Highlight to tint only the glow of highlighted ones.
 Timeline_Scroll$Alt to box select, + Ctrl multi select.<br>Ctrl + Scroll to zoom timeline.<br>Drag timebar above to adjust time.
 Timeline_Prev$Switch to the previous motion of the selected motion's type.
 Timeline_Next$Switch to the next motion of the selected motion's type.
@@ -355,6 +511,17 @@ MediaPlayer_PlayControl$When no button is selected, Press Spacebar to Play/Pause
 MediaPlayer_Progress$Ctrl + ←/→ Move Progress forward/afterward a beatline's time.<br>Alt + ←/→ Move Progress forward/afterward 0.001s<br>Shift + ←/→ Move Progress forward/afterward 0.01s
 ClickToCreate_Beatline$You can also Hold Alt when click.
 ClickToCreate_Angleline$You can also Hold Ctrl when click.
+Angleline_AddFavourite$Add to favourites
+Angleline_UseFavourite$Show these anglelines
+Creator_CatchRail_Spins$Whole turns round the core the new catch notes make on their way to the second selected note. Blank or 0 goes straight there.
+Angleline_DeleteFavourite$Remove from favourites
+Angleline_EditFavourite$Edit this favourite
+Favourites_Add$Save the selection to favourites
+Favourites_Use$Copy
+Favourites_Rename$Rename
+Favourites_Forget$Delete (double click)
+Favourites_Export$Save favourites to a file
+Favourites_Import$Add favourites from a file
 ClickToCreate_Enable$Click to create joint when you select ONE long note.
 Capturer_Export$Will autosave chart, and all inputs are ignored while exporting, Press ESC to cancel.
 TunerWindow_FullScreen$Press ESC to return.
@@ -363,6 +530,25 @@ Create_ConvertSelectedToHoldNote$Convert selected to Hold Note, first in time as
 TxtToLap$To open old .txt file, please Create a New Project and select your .txt in Chart Path.
 MusicFormat$Only support .wav or .ogg
 DisableChartSpeed$If disabled, you cannot edit Scroll Speed in Inspector and create Scroll Speed either.
+Header_Difficulty$Click: change the difficulty (Whisper, Acoustic, Ultra, Master, your own or hidden).<br>Right click: set your own difficulty, its word and its colour.
+Header_Level$Click to type the level.
+Header_Pause$Play / pause
+UiTweak_NoteEffects$Flashes, shockwaves and sparks when a note reaches the judge line, as in the game.
+UiTweak_ComboCounter$Shows the combo beside each note that reaches the judge line.
+UiTweak_FlickArrows$A moving arrow on Flick In and Flick Out notes pointing the way to swipe, as in the game.
+UiTweak_JudgeOrnaments$A glow that pulses with the beat and an ornamental ring on the judge line.
+UiTweak_Wave$The blue wave along the bottom, rising and falling with the beat,<br>and the specks drifting up from below, as in the game.
+UiTweak_LanotaHeader$The Tuner header as the game has it. Click the difficulty to change it<br>and the number to type the level; both are saved with the project.
+UiTweak_ShowScore$With the Lanota Header, shows the game's score instead of the chart designer.<br>Every note counts as a perfect hit.
+UiTweak_TunerSkin$Ritmo and Fisica are the usual ones; the rest are the skins in<br>StreamingAssets/TunerSkin (one folder per skin, holding its PNGs).
+UiTweak_PerfectPurified$When playback passes the end of the last note (score 1,000,000),<br>the game's "Perfect Purified" appears with its sound.
+UiTweak_ReadyIntro$Playing from the very start holds the song for 4 seconds while "Ready" shows, as in the game.<br>Press play again to skip it.
+UiTweak_HdRails$Sharper rail bodies: the pressed one brighter, the unpressed one with the game's dark edges.
+UiTweak_HdCore$The tuner's core at 1024 px, sharper. A skin with its own core replaces it.
+UiTweak_ProgressBar$With the Lanota Header, a thin light along the top edge showing how far into the song playback is.
+UiTweak_CompactHighlight$Highlighted notes' glow drawn close to the note, as in the game.
+UiTweak_CustomDifficulty$Your own difficulty for the Lanota Header: a word and a colour in HEX, typed or picked. Saved with the project.
+TopMenu_Language$Idioma / Language
 #TutorialDict
 FirstProject1$Welcome to use Lanotalium!<br>Click 'File' to create your first project!
 FirstProject2$Click 'New Project' to create your first project!

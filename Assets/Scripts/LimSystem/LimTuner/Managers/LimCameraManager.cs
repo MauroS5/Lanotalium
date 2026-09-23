@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class LimCameraManager : MonoBehaviour
+public partial class LimCameraManager : MonoBehaviour
 {
     private bool isInitialized = false;
     public LimTunerManager Tuner;
     public List<Lanotalium.Chart.LanotaCameraRot> Rotation;
     public List<Lanotalium.Chart.LanotaCameraXZ> Horizontal;
     public List<Lanotalium.Chart.LanotaCameraY> Vertical;
+    /// <summary>
+    /// The chart's own fades of the tuner. See LimCameraManagerTransparency.
+    /// </summary>
+    public List<Lanotalium.Chart.LanotaCameraTrs> Transparency;
     public Lanotalium.Chart.LanotaDefault Default;
     public GameObject TunerCamera, TunerGameObject;
     public bool DisableCameraUpdate = false;
@@ -22,9 +26,20 @@ public class LimCameraManager : MonoBehaviour
     public float CurrentRou = 0;
     public float CurrentTheta = 0;
 
+    /// <summary>
+    /// Where the editor has dragged the view to, on the chart plane. It is
+    /// added to wherever the chart's own motions put the camera, so the ring
+    /// can be moved aside to work on it without the chart changing at all:
+    /// nothing here is ever saved.
+    /// </summary>
+    public Vector2 ViewOffset = Vector2.zero;
+
     void Update()
     {
         if (!isInitialized) return;
+        // Ahead of the camera switch: the gizmo holds the camera still while
+        // it is dragged, which is nothing to do with how see-through the ring is.
+        UpdateTunerTransparency();
         if (DisableCameraUpdate) return;
         if (DisableMotion)
         {
@@ -41,12 +56,20 @@ public class LimCameraManager : MonoBehaviour
         List<Lanotalium.Chart.LanotaCameraRot> RotationData,
         List<Lanotalium.Chart.LanotaCameraXZ> HorizontalData,
         List<Lanotalium.Chart.LanotaCameraY> VerticalData,
+        List<Lanotalium.Chart.LanotaCameraTrs> TransparencyData,
         Lanotalium.Chart.LanotaDefault DefaultData)
     {
         Rotation = RotationData;
         Horizontal = HorizontalData;
         Vertical = VerticalData;
+        Transparency = TransparencyData;
+        // The walk that works the fade out assumes time order, and a chart
+        // written by hand need not be in it.
+        SortTransparencyList();
         Default = DefaultData;
+        // A new chart starts with the ring where the chart puts it, not where
+        // the last one had been dragged to.
+        ViewOffset = Vector2.zero;
         isInitialized = true;
     }
 
@@ -81,7 +104,12 @@ public class LimCameraManager : MonoBehaviour
     {
         return LimNoteEase.Instance.CalculateEasedPercent(Percent);
     }
-    private float CalculateEasedCurve(float Percent, int Mode)
+    /// <summary>
+    /// The editor's ease curves, 0 being a straight line. Public because the
+    /// Creator bends a run of notes with the same numbers a motion takes, and
+    /// the two have to agree on what each one means.
+    /// </summary>
+    public float CalculateEasedCurve(float Percent, int Mode)
     {
         if (Percent >= 1.0) return 1.0f;
         else if (Percent <= 0.0) return 0.0f;
@@ -286,7 +314,7 @@ public class LimCameraManager : MonoBehaviour
     }
     private void UpdateCameraStatus()
     {
-        TunerCamera.transform.position = new Vector3(CurrentHorizontalX, CurrentVerticalY, CurrentHorizontalZ);
+        TunerCamera.transform.position = new Vector3(CurrentHorizontalX + ViewOffset.x, CurrentVerticalY, CurrentHorizontalZ + ViewOffset.y);
         TunerGameObject.transform.rotation = Quaternion.Euler(new Vector3(0, CurrentRotation, 0));
     }
 

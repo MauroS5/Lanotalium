@@ -51,6 +51,20 @@ public class LimEditorManager : MonoBehaviour
         TimeLineWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.TimelineSize.ToVector2();
         CreatorWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.CreatorSize.ToVector2();
         SpectrumWindow.BaseWindow.WindowRectTransform.sizeDelta = LimSystem.EditorLayout.SpectrumSize.ToVector2();
+        foreach (LimWindowManager Window in new[] { MusicPlayerWindow.BaseWindow, InspectorWindow.BaseWindow, TunerWindow.BaseWindow, TimeLineWindow.BaseWindow, CreatorWindow.BaseWindow, SpectrumWindow.BaseWindow })
+            KeepOnScreen(Window.WindowRectTransform);
+    }
+    /// <summary>
+    /// A window saved reaching past the right edge of the screen comes back
+    /// only as wide as the room left, since its right edge, where it is
+    /// resized, could not be reached to bring it back.
+    /// </summary>
+    private static void KeepOnScreen(RectTransform Window)
+    {
+        RectTransform Screen = Window.parent as RectTransform;
+        if (Screen == null) return;
+        float Room = Screen.rect.width - Window.anchoredPosition.x;
+        if (Room > 200 && Window.sizeDelta.x > Room) Window.sizeDelta = new Vector2(Room, Window.sizeDelta.y);
     }
     public void SaveEditorLayout()
     {

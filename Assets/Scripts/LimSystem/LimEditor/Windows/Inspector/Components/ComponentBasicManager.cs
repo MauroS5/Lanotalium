@@ -126,7 +126,7 @@ public class ComponentBasicManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float TimingTmp;
-        if (!float.TryParse(Timing.text, out TimingTmp))
+        if (!LimNumber.TryParseFloat(Timing.text, out TimingTmp))
         {
             TimingImg.color = InvalidColor;
             return;
@@ -142,15 +142,17 @@ public class ComponentBasicManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float DegreeTmp;
-        if (!float.TryParse(Degree.text, out DegreeTmp))
+        if (!LimNumber.TryParseFloat(Degree.text, out DegreeTmp))
         {
             DegreeImg.color = InvalidColor;
             return;
         }
         if (Mode == Lanotalium.Editor.ComponentBasicMode.Work)
         {
-            foreach (Lanotalium.Chart.LanotaTapNote Tap in OperationManager.SelectedTapNote) OperationManager.SetTapNoteDegree(Tap, DegreeTmp, isAbsolute);
-            foreach (Lanotalium.Chart.LanotaHoldNote Hold in OperationManager.SelectedHoldNote) OperationManager.SetHoldNoteDegree(Hold, DegreeTmp, isAbsolute);
+            // Written as typed. Everywhere else a degree is wrapped into
+            // 0-360, but a number put in this box by hand is meant.
+            foreach (Lanotalium.Chart.LanotaTapNote Tap in OperationManager.SelectedTapNote) OperationManager.SetTapNoteDegree(Tap, DegreeTmp, isAbsolute, true, false);
+            foreach (Lanotalium.Chart.LanotaHoldNote Hold in OperationManager.SelectedHoldNote) OperationManager.SetHoldNoteDegree(Hold, DegreeTmp, isAbsolute, true, false);
         }
         DegreeImg.color = ValidColor;
     }
@@ -184,7 +186,7 @@ public class ComponentBasicManager : MonoBehaviour
     {
         if (!EnableValueChange) return;
         float SizefTmp = 0;
-        if(!float.TryParse(Sizef.text,out SizefTmp))
+        if(!LimNumber.TryParseFloat(Sizef.text,out SizefTmp))
         {
             SizefImg.color = InvalidColor;
             return;
